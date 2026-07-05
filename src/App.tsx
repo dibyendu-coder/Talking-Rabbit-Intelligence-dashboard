@@ -406,6 +406,53 @@ export default function App() {
 
               {activeTab === "dashboard" ? (
                 <>
+                  {/* Dynamic Visualization Agent Control Center */}
+                  <div id="vis-agent-control-center" className="bg-gradient-to-r from-slate-900 to-indigo-950/20 border border-slate-800/80 rounded-2xl p-4 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                      <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl shrink-0">
+                        <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-100">Dynamic Visualization Agent</h3>
+                        <p className="text-[11px] text-slate-400">Trigger smart visualizations, matrix heatmaps, and performance summaries instantly.</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto justify-end">
+                      <button
+                        type="button"
+                        onClick={() => submitQuery("Analyze the dataset and generate a dynamic bar chart comparing the top performing metrics")}
+                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                      >
+                        <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Dynamic Chart</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => submitQuery("Perform a complete multidimensional analysis on the dataset and represent it as a beautiful visual heatmap matrix")}
+                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <span>Generate Heatmap</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => submitQuery("Extract 4 core business metrics from this dataset to compile my dynamic KPI dashboard panel")}
+                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                      >
+                        <ArrowUpRight className="w-3.5 h-3.5 text-amber-400" />
+                        <span>KPI Dashboard</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => submitQuery("Synthesize a high-level performance summary of this data highlighting trends, anomalies, and tactical action items")}
+                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-pink-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-pink-400" />
+                        <span>Performance Summary</span>
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Real-time KPI Dashboards dynamically computed by AI */}
                   {currentResponse?.kpis && (
                     <div id="kpis-grid" className="grid grid-cols-2 md:grid-cols-4 gap-4">

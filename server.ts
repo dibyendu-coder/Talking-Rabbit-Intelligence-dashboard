@@ -36,8 +36,8 @@ You must respond STRICTLY with a valid JSON object matching the requested schema
 
 Your response must include:
 1. "answer": A natural, conversational voice-optimized reply that explains the metrics, insights, and answers the query. It should be concise and direct so it is easy to read out loud. Avoid complex markdown formatting in this specific field (no asterisks, hash signs, or tables), because this field is read aloud by the Text-to-Speech engine. Keep it extremely engaging!
-2. "chartConfig": Configuration for visual representations. Choose the most appropriate chartType ("bar", "line", "pie", "area", or "none"). 
-   CRITICAL CRITERION: If the user's query asks for a chart, comparison, trend, distribution, rate, or breakdown, you MUST choose a visual chartType ("bar", "line", "pie", "area") and must NOT return "none". Calculate and aggregate the data from the raw records provided to populate the chart's data property.
+2. "chartConfig": Configuration for visual representations. Choose the most appropriate chartType ("bar", "line", "pie", "area", "heatmap", or "none"). 
+   CRITICAL CRITERION: If the user's query asks for a chart, comparison, trend, distribution, rate, heatmap, correlation, or breakdown, you MUST choose an appropriate visual chartType ("bar", "line", "pie", "area", "heatmap") and must NOT return "none". For 'heatmap', populate the xValue property in the data array as a combined key with a pipe separator: "Category X | Category Y" (e.g., "West | Electronics") and the yValue property with the intensity/numeric value. Calculate and aggregate the data from the raw records provided to populate the chart's data property.
 3. "insights": 3-4 deep analytical insights highlighting positive trends, negative trends, anomalies, or underperforming items.
 4. "recommendations": 3 practical recommendations with details, suggested offers or interventions, and estimated business impact.
 5. "forecast": Simple 3-period predictive projections based on trends.
@@ -96,7 +96,7 @@ Formulate a concise conversational answer, prepare a curated small aggregated da
             properties: {
               chartType: {
                 type: Type.STRING,
-                description: "Must be one of 'bar', 'line', 'pie', 'area', or 'none'. Select none ONLY for plain textual greetings with zero data involved.",
+                description: "Must be one of 'bar', 'line', 'pie', 'area', 'heatmap', or 'none'. Select 'heatmap' for correlation matrix grids or multi-dimensional comparison grids. Select none ONLY for plain textual greetings with zero data involved.",
               },
               title: { type: Type.STRING, description: "Title of the chart" },
               xAxisKey: { type: Type.STRING, description: "Exact label or category name for x-axis (e.g., 'Product Type' or 'Month')." },
@@ -110,7 +110,7 @@ Formulate a concise conversational answer, prepare a curated small aggregated da
                   properties: {
                     xValue: {
                       type: Type.STRING,
-                      description: "The category, label, or date for the x-axis (e.g., 'Electronics', 'January').",
+                      description: "The category, label, or date for the x-axis (e.g., 'Electronics', 'January'). For heatmaps, format as 'Category X | Category Y' (e.g., 'West | Electronics') to allow visual grid rendering.",
                     },
                     yValue: {
                       type: Type.NUMBER,

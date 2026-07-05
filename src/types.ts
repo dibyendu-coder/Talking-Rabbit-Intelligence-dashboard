@@ -27,7 +27,7 @@ export interface Forecast {
 }
 
 export interface ChartConfig {
-  chartType: "bar" | "line" | "pie" | "area" | "none";
+  chartType: "bar" | "line" | "pie" | "area" | "heatmap" | "none";
   title: string;
   xAxisKey: string;
   yAxisKey: string;

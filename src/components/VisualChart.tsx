@@ -403,6 +403,124 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
           </PieChart>
         );
 
+      case "heatmap": {
+        const gridData: { x: string; y: string; val: number }[] = [];
+        const xSet = new Set<string>();
+        const ySet = new Set<string>();
+
+        processedData.forEach((entry) => {
+          const rawX = String(entry[xAxisKey] || "");
+          let xPart = rawX;
+          let yPart = "Default";
+
+          if (rawX.includes("|")) {
+            const parts = rawX.split("|");
+            xPart = parts[0]?.trim() || "";
+            yPart = parts[1]?.trim() || "";
+          }
+
+          const numericVal = Number(entry[yAxisKey]) || 0;
+          gridData.push({ x: xPart, y: yPart, val: numericVal });
+          xSet.add(xPart);
+          ySet.add(yPart);
+        });
+
+        if (ySet.size === 1 && xSet.size > 3) {
+          const xList = Array.from(xSet);
+          xSet.clear();
+          ySet.clear();
+          gridData.length = 0;
+          
+          const colCount = Math.ceil(Math.sqrt(xList.length));
+          processedData.forEach((entry, idx) => {
+            const rowIdx = Math.floor(idx / colCount);
+            const colIdx = idx % colCount;
+            const xLabel = xList[colIdx] || `Col ${colIdx + 1}`;
+            const yLabel = `Segment ${rowIdx + 1}`;
+            
+            const numericVal = Number(entry[yAxisKey]) || 0;
+            gridData.push({ x: xLabel, y: yLabel, val: numericVal });
+            xSet.add(xLabel);
+            ySet.add(yLabel);
+          });
+        }
+
+        const cols = Array.from(xSet);
+        const rows = Array.from(ySet);
+
+        const values = gridData.map(d => d.val);
+        const maxVal = values.length ? Math.max(...values) : 100;
+        const minVal = values.length ? Math.min(...values) : 0;
+        const range = maxVal - minVal || 1;
+
+        const getCellBg = (val: number) => {
+          const ratio = (val - minVal) / range;
+          if (ratio < 0.25) return "bg-indigo-950/20 text-indigo-400 border-slate-800";
+          if (ratio < 0.5) return "bg-indigo-900/40 text-indigo-300 border-indigo-900/50";
+          if (ratio < 0.75) return "bg-indigo-700/60 text-indigo-100 border-indigo-700/40";
+          return "bg-emerald-600/80 text-white font-bold border-emerald-500/40";
+        };
+
+        return (
+          <div className="w-full h-full overflow-auto flex flex-col justify-between py-2">
+            <div className="min-w-[450px] overflow-x-auto pr-2">
+              <div 
+                className="grid gap-2 text-center"
+                style={{ 
+                  gridTemplateColumns: `100px repeat(${cols.length}, minmax(70px, 1fr))` 
+                }}
+              >
+                <div className="text-left text-[10px] uppercase font-bold tracking-wider text-slate-500 self-center font-mono truncate p-1">
+                  Metric Correlation
+                </div>
+                {cols.map((col, idx) => (
+                  <div key={idx} className="text-[10px] font-bold text-slate-400 uppercase tracking-wide font-mono truncate p-1" title={col}>
+                    {col}
+                  </div>
+                ))}
+
+                {rows.map((row, rIdx) => (
+                  <React.Fragment key={rIdx}>
+                    <div className="text-left text-[10px] font-bold text-slate-400 font-mono truncate p-1 bg-slate-950/40 border border-slate-800/40 rounded-lg flex items-center px-2">
+                      {row}
+                    </div>
+                    {cols.map((col, cIdx) => {
+                      const item = gridData.find(d => d.x === col && d.y === row);
+                      const val = item ? item.val : 0;
+                      return (
+                        <div
+                          key={cIdx}
+                          className={`p-3 rounded-xl border text-xs font-mono transition-all duration-200 hover:scale-[1.03] hover:shadow-lg flex flex-col justify-center items-center h-14 ${getCellBg(val)}`}
+                          title={`${row} x ${col}: ${isPercent ? `${val.toFixed(1)}%` : formatYAxis(val)}`}
+                        >
+                          <span className="text-[11px] font-extrabold tracking-tight">
+                            {isPercent ? `${val.toFixed(0)}%` : val >= 1000 ? `${(val / 1000).toFixed(1)}K` : val}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+
+            {!isMini && (
+              <div className="mt-4 flex items-center justify-end gap-2.5 text-[10px] font-mono text-slate-400 px-2 flex-wrap">
+                <span>Intensity Scale:</span>
+                <div className="flex items-center gap-1 bg-slate-950/40 p-1.5 border border-slate-800/80 rounded-xl">
+                  <span className="w-2.5 h-2.5 rounded bg-indigo-950/20 border border-slate-800"></span>
+                  <span className="text-slate-500 mr-2">Low ({isPercent ? `${minVal.toFixed(0)}%` : formatYAxis(minVal)})</span>
+                  <span className="w-2.5 h-2.5 rounded bg-indigo-900/40 border border-indigo-900/50"></span>
+                  <span className="w-2.5 h-2.5 rounded bg-indigo-700/60 border border-indigo-700/40"></span>
+                  <span className="w-2.5 h-2.5 rounded bg-emerald-600/80 border border-emerald-500/40"></span>
+                  <span className="text-slate-300">High ({isPercent ? `${maxVal.toFixed(0)}%` : formatYAxis(maxVal)})</span>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
       default:
         return null;
     }
@@ -440,7 +558,7 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
         <div className="flex items-center gap-1.5 flex-wrap">
           {/* Interactive Chart Type Selector */}
           <div className="flex bg-slate-950/60 p-1 border border-slate-800/80 rounded-xl items-center gap-1">
-            {(["bar", "line", "area", "pie"] as const).map((type) => (
+            {(["bar", "line", "area", "pie", "heatmap"] as const).map((type) => (
               <button
                 key={type}
                 onClick={() => {
