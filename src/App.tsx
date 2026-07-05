@@ -31,8 +31,10 @@ import SpreadsheetLoader from "./components/SpreadsheetLoader";
 import VoiceController from "./components/VoiceController";
 import VisualChart from "./components/VisualChart";
 import RecommendationCard from "./components/RecommendationCard";
+import LandingPage from "./components/LandingPage";
 
 export default function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [rawData, setRawData] = useState<any[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -221,24 +223,57 @@ export default function App() {
     }
   };
 
+  if (showLanding) {
+    return (
+      <LandingPage
+        onEnterWorkspace={() => setShowLanding(false)}
+        onDataLoaded={(data, raw) => {
+          handleDataLoaded(data, raw);
+          setShowLanding(false);
+        }}
+        isProcessing={isProcessing}
+        customKey={customKey}
+        onToggleKeyInput={() => {
+          setShowKeyInput(true);
+          setShowLanding(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
       {/* Dynamic Header Block */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div 
+            className="flex items-center gap-3 w-full sm:w-auto cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all" 
+            onClick={() => setShowLanding(true)}
+            title="Return to Landing Page"
+          >
             <div className="p-2.5 bg-gradient-to-tr from-indigo-600 to-emerald-500 rounded-xl shadow-lg shadow-indigo-500/10">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                Talking Rabbitt
-              </h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                  Talking Rabbitt
+                </h1>
+                <span className="text-[9px] font-mono tracking-widest text-indigo-400 font-extrabold uppercase bg-indigo-950/40 border border-indigo-900/40 px-1.5 py-0.5 rounded-full">HOME</span>
+              </div>
               <p className="text-xs text-slate-400 font-medium">AI Powered Business Intelligence Dashboard</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
+            <button
+              onClick={() => setShowLanding(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl border border-slate-700/80 transition-all duration-200 text-xs font-semibold cursor-pointer"
+              title="Return to Premium Landing Page"
+            >
+              <span>← View Landing Page</span>
+            </button>
+
             <button
               onClick={() => setShowKeyInput(!showKeyInput)}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border transition-all duration-200 shadow-sm text-xs font-semibold cursor-pointer ${
