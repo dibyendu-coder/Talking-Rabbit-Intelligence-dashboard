@@ -1,0 +1,6 @@
+{
+  "name": "Talking Rabbitt - AI Powered Business Intelligence Dashboard",
+  "description": "An AI-powered talking business intelligence dashboard that parses Excel/CSV files, generates dynamic visualizations, detects anomalies, and answers analytical queries with text-to-speech.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
