@@ -74,12 +74,17 @@ export async function createWorkspace(
 ): Promise<Workspace> {
   try {
     const newDocRef = doc(collection(db, "workspaces"));
+    // Cap rawData saved to Firestore to a maximum of 500 rows to prevent exceeding the 1MB document limit
+    const rawDataToSave = initialData?.rawData 
+      ? initialData.rawData.slice(0, 500) 
+      : [];
+
     const workspaceData = {
       id: newDocRef.id,
       userId,
       name,
       parsedData: initialData?.parsedData || null,
-      rawData: initialData?.rawData || [],
+      rawData: rawDataToSave,
       chatHistory: initialData?.chatHistory || [],
       currentResponse: initialData?.currentResponse || null,
       customApiKey: initialData?.customApiKey || "",
@@ -105,8 +110,15 @@ export async function updateWorkspace(
 ): Promise<void> {
   try {
     const docRef = doc(db, "workspaces", workspaceId);
+    
+    // Cap rawData to a maximum of 500 rows to prevent exceeding the 1MB Firestore document limit
+    const updatesToSave = { ...updates };
+    if (updatesToSave.rawData) {
+      updatesToSave.rawData = updatesToSave.rawData.slice(0, 500);
+    }
+
     await updateDoc(docRef, {
-      ...updates,
+      ...updatesToSave,
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
