@@ -1,0 +1,26 @@
+{
+  "entities": {
+    "users": {
+      "fields": {
+        "uid": "string",
+        "email": "string",
+        "displayName": "string",
+        "createdAt": "timestamp"
+      }
+    },
+    "workspaces": {
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "name": "string",
+        "parsedData": "object",
+        "rawData": "array",
+        "chatHistory": "array",
+        "currentResponse": "object",
+        "customApiKey": "string",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+      }
+    }
+  }
+}

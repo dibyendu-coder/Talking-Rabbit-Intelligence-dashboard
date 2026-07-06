@@ -179,32 +179,75 @@ Formulate a concise conversational answer, prepare a curated small aggregated da
       },
     };
 
-    try {
-      response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: userPrompt,
-        config: requestConfig,
-      });
-    } catch (primaryError: any) {
-      const errorStr = String(primaryError?.message || primaryError || "").toLowerCase();
-      const isQuotaError = errorStr.includes("429") || errorStr.includes("resource_exhausted") || errorStr.includes("quota") || errorStr.includes("limit exceeded");
+    // Robust model execution with automatic fallback and retry logic
+    const hasCustomKey = !!customApiKey;
+    const modelsToTry = hasCustomKey
+      ? ["gemini-3.5-flash", "gemini-3.1-pro-preview", "gemini-3.1-flash-lite"]
+      : ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
+
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    let lastError: any = null;
+    let success = false;
+
+    for (const model of modelsToTry) {
+      usedModel = model;
+      console.log(`[Gemini API] Attempting generation with model: ${model}`);
       
-      if (isQuotaError) {
-        console.warn("Primary model gemini-3.5-flash quota exceeded or rate-limited. Falling back to gemini-3.1-flash-lite...");
+      // Try up to 3 times per model with backoff for transient errors
+      for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-          usedModel = "gemini-3.1-flash-lite";
           response = await ai.models.generateContent({
-            model: "gemini-3.1-flash-lite",
+            model: model,
             contents: userPrompt,
             config: requestConfig,
           });
-        } catch (fallbackError: any) {
-          console.error("Fallback model gemini-3.1-flash-lite also failed:", fallbackError);
-          throw primaryError; // Re-throw primary quota error to propagate nicely
+          success = true;
+          break; // Exit retry loop on success
+        } catch (err: any) {
+          lastError = err;
+          const errMsg = String(err?.message || err || "").toLowerCase();
+          
+          // Check for a hard quota/limit of 0 (e.g. Free Tier restriction on certain models)
+          const isHardLimitZero = errMsg.includes("limit: 0") || 
+                                  errMsg.includes("limit is 0") || 
+                                  errMsg.includes("limit of 0") || 
+                                  errMsg.includes("quota exceeded for metric");
+
+          if (isHardLimitZero) {
+            console.log(`[Gemini API] Hard quota limit of 0 encountered for ${model}. Skipping model immediately without retry.`);
+            break; // Exit retry loop immediately to try next fallback model
+          }
+
+          const isTransient = errMsg.includes("503") || 
+                            errMsg.includes("unavailable") || 
+                            errMsg.includes("overloaded") || 
+                            errMsg.includes("temporary") || 
+                            errMsg.includes("429") || 
+                            errMsg.includes("quota") || 
+                            errMsg.includes("rate_limit") || 
+                            errMsg.includes("resource_exhausted") || 
+                            errMsg.includes("limit exceeded");
+          
+          if (isTransient && attempt < 3) {
+            const delay = attempt * 1000;
+            console.log(`[Gemini API] Model ${model} is busy (attempt ${attempt}/3). Retrying in ${delay}ms...`);
+            await sleep(delay);
+          } else {
+            console.log(`[Gemini API] Model ${model} busy (attempt ${attempt}/3). Switching to next model...`);
+            break; // Proceed to fallback model
+          }
         }
-      } else {
-        throw primaryError;
       }
+
+      if (success) {
+        console.log(`[Gemini API] Success using model: ${usedModel}`);
+        break; // Exit model fallback loop
+      }
+    }
+
+    if (!success) {
+      throw lastError || new Error("All models in fallback sequence failed to generate content.");
     }
  
     const text = response.text;
@@ -217,11 +260,17 @@ Formulate a concise conversational answer, prepare a curated small aggregated da
     console.error("Error analyzing dashboard request:", error);
     const errorStr = String(error?.message || error || "").toLowerCase();
     const isQuotaError = errorStr.includes("429") || errorStr.includes("resource_exhausted") || errorStr.includes("quota") || errorStr.includes("limit exceeded");
+    const isDemandError = errorStr.includes("503") || errorStr.includes("unavailable") || errorStr.includes("overloaded");
     
     if (isQuotaError) {
       res.status(429).json({
         error: "Gemini API free-tier quota has been fully exhausted. Click below to instantly activate the high-quota Paid Model Flow, or wait for your daily limit to reset.",
         isQuotaExceeded: true,
+      });
+    } else if (isDemandError) {
+      res.status(503).json({
+        error: "The AI models are currently experiencing extremely high peak demand. Click 'Send' again to retry, or configure your private API key above for higher reliability.",
+        isDemandExceeded: true,
       });
     } else {
       res.status(500).json({

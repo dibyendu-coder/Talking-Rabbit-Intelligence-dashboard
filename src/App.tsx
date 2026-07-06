@@ -32,6 +32,17 @@ import VoiceController from "./components/VoiceController";
 import VisualChart from "./components/VisualChart";
 import RecommendationCard from "./components/RecommendationCard";
 import LandingPage from "./components/LandingPage";
+import { auth } from "./lib/firebase";
+import { User as FirebaseUser } from "firebase/auth";
+import { 
+  getUserWorkspaces, 
+  createWorkspace, 
+  updateWorkspace, 
+  deleteWorkspace, 
+  Workspace 
+} from "./lib/workspaceService";
+import AuthModal from "./components/AuthModal";
+import WorkspacesSidebar from "./components/WorkspacesSidebar";
 
 export default function App() {
   const [showLanding, setShowLanding] = useState(true);
@@ -53,12 +64,144 @@ export default function App() {
   const [isKeyVisible, setIsKeyVisible] = useState(false);
   const [keySavedStatus, setKeySavedStatus] = useState(false);
 
+  // Secure Authentication & Workspace states
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll chat on updates
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory]);
+
+  // Helper to select a workspace
+  const selectWorkspace = (ws: Workspace) => {
+    setActiveWorkspaceId(ws.id);
+    setParsedData(ws.parsedData);
+    setRawData(ws.rawData);
+    setChatHistory(ws.chatHistory);
+    setCurrentResponse(ws.currentResponse);
+    setCustomKey(ws.customApiKey);
+  };
+
+  // Helper to sync changes of the active workspace to Firestore
+  const syncActiveWorkspace = async (updatedFields: Partial<Omit<Workspace, "id" | "userId" | "createdAt">>) => {
+    if (auth.currentUser && activeWorkspaceId) {
+      try {
+        await updateWorkspace(activeWorkspaceId, updatedFields);
+        setWorkspaces((prev) =>
+          prev.map((w) => (w.id === activeWorkspaceId ? { ...w, ...updatedFields } : w))
+        );
+      } catch (error) {
+        console.error("Failed to sync workspace update to Cloud", error);
+      }
+    }
+  };
+
+  // Create workspace operation
+  const handleCreateWorkspace = async (name: string) => {
+    if (!currentUser) return;
+    try {
+      const newWs = await createWorkspace(currentUser.uid, name);
+      setWorkspaces((prev) => [newWs, ...prev]);
+      selectWorkspace(newWs);
+    } catch (error) {
+      console.error("Error creating workspace", error);
+    }
+  };
+
+  // Delete workspace operation
+  const handleDeleteWorkspace = async (id: string) => {
+    try {
+      await deleteWorkspace(id);
+      const remaining = workspaces.filter((w) => w.id !== id);
+      setWorkspaces(remaining);
+      if (activeWorkspaceId === id) {
+        if (remaining.length > 0) {
+          selectWorkspace(remaining[0]);
+        } else {
+          resetDashboard();
+          setActiveWorkspaceId(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting workspace", error);
+    }
+  };
+
+  // Rename workspace operation
+  const handleRenameWorkspace = async (id: string, newName: string) => {
+    try {
+      await updateWorkspace(id, { name: newName });
+      setWorkspaces((prev) =>
+        prev.map((w) => (w.id === id ? { ...w, name: newName } : w))
+      );
+    } catch (error) {
+      console.error("Error renaming workspace", error);
+    }
+  };
+
+  // Secure Auth State listener & cloud synchronization on boot
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      setCurrentUser(user);
+      if (user) {
+        try {
+          const wsList = await getUserWorkspaces(user.uid);
+          setWorkspaces(wsList);
+          if (wsList.length > 0) {
+            selectWorkspace(wsList[0]);
+          } else {
+            // No workspaces exist: create a default workspace on cloud with current dataset or a sample data
+            const defaultName = parsedData ? `Workspace: ${parsedData.fileName}` : "Analytics Workspace";
+            const newWs = await createWorkspace(user.uid, defaultName, {
+              parsedData,
+              rawData,
+              chatHistory,
+              currentResponse,
+              customApiKey: customKey
+            });
+            setWorkspaces([newWs]);
+            setActiveWorkspaceId(newWs.id);
+          }
+        } catch (error) {
+          console.error("Error fetching workspaces on login", error);
+        }
+      } else {
+        setWorkspaces([]);
+        setActiveWorkspaceId(null);
+        // Load default local sample on logout if no data exists
+        if (!parsedData) {
+          import("./data").then(({ SAMPLE_DATASETS, getParsedStats }) => {
+            const defaultSample = SAMPLE_DATASETS[0];
+            const parsed = getParsedStats(`${defaultSample.name} Template.csv`, defaultSample.data);
+            setParsedData(parsed);
+            setRawData(defaultSample.data);
+            runInitialAnalysis(parsed, defaultSample.data);
+          });
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Auto-load default dataset on mount ONLY for unauthenticated guests
+  useEffect(() => {
+    if (!auth.currentUser) {
+      import("./data").then(({ SAMPLE_DATASETS, getParsedStats }) => {
+        const defaultSample = SAMPLE_DATASETS[0];
+        const parsed = getParsedStats(`${defaultSample.name} Template.csv`, defaultSample.data);
+        setParsedData(parsed);
+        setRawData(defaultSample.data);
+        runInitialAnalysis(parsed, defaultSample.data);
+      }).catch(err => {
+        console.error("Failed to load default sample dataset", err);
+      });
+    }
+  }, []);
 
   // Initial analytic auto-discovery once data gets uploaded
   const runInitialAnalysis = async (metadata: ParsedData, rawRows: any[]) => {
@@ -101,6 +244,14 @@ export default function App() {
         chartConfig: result.chartConfig,
       };
       setChatHistory([welcomeMsg]);
+
+      // Sync welcome and results to current active cloud workspace
+      syncActiveWorkspace({
+        parsedData: metadata,
+        rawData: rawRows,
+        chatHistory: [welcomeMsg],
+        currentResponse: result
+      });
     } catch (err: any) {
       console.error(err);
       setApiError(err.message || "An error occurred during dataset compilation.");
@@ -109,22 +260,20 @@ export default function App() {
     }
   };
 
-  const handleDataLoaded = (data: ParsedData, raw: any[]) => {
+  const handleDataLoaded = async (data: ParsedData, raw: any[]) => {
     setParsedData(data);
     setRawData(raw);
-    runInitialAnalysis(data, raw);
-  };
 
-  // Auto-load default dataset on mount so the dashboard and chat are immediately available
-  useEffect(() => {
-    import("./data").then(({ SAMPLE_DATASETS, getParsedStats }) => {
-      const defaultSample = SAMPLE_DATASETS[0];
-      const parsed = getParsedStats(`${defaultSample.name} Template.csv`, defaultSample.data);
-      handleDataLoaded(parsed, defaultSample.data);
-    }).catch(err => {
-      console.error("Failed to load default sample dataset", err);
+    // Sync initial load of data
+    syncActiveWorkspace({
+      parsedData: data,
+      rawData: raw,
+      chatHistory: [],
+      currentResponse: null
     });
-  }, []);
+
+    await runInitialAnalysis(data, raw);
+  };
 
   // Process user message (text or speech)
   const submitQuery = async (queryText: string) => {
@@ -138,7 +287,8 @@ export default function App() {
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setChatHistory((prev) => [...prev, userMsg]);
+    const updatedHistoryWithUser = [...chatHistory, userMsg];
+    setChatHistory(updatedHistoryWithUser);
     setUserInput("");
     setIsProcessing(true);
     setApiError(null);
@@ -172,14 +322,11 @@ export default function App() {
       setIsQuotaError(false);
 
       // Update dashboard visuals dynamically if requested
-      setCurrentResponse((prev) => {
-        if (!prev) return result;
-        return {
-          ...result,
-          // Merge KPIs if not fully generated
-          kpis: result.kpis?.length ? result.kpis : prev.kpis,
-        };
-      });
+      const nextResponse = {
+        ...result,
+        kpis: result.kpis?.length ? result.kpis : currentResponse?.kpis
+      };
+      setCurrentResponse(nextResponse);
 
       setLastSpeechText(result.answer);
 
@@ -191,7 +338,15 @@ export default function App() {
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         chartConfig: result.chartConfig,
       };
-      setChatHistory((prev) => [...prev, assistantMsg]);
+      
+      const finalHistory = [...updatedHistoryWithUser, assistantMsg];
+      setChatHistory(finalHistory);
+
+      // Sync updated history and result to cloud database
+      syncActiveWorkspace({
+        chatHistory: finalHistory,
+        currentResponse: nextResponse
+      });
     } catch (err: any) {
       console.error(err);
       setApiError(err.message || "An error occurred. Check backend connections.");
@@ -225,26 +380,49 @@ export default function App() {
 
   if (showLanding) {
     return (
-      <LandingPage
-        onEnterWorkspace={() => setShowLanding(false)}
-        onDataLoaded={(data, raw) => {
-          handleDataLoaded(data, raw);
-          setShowLanding(false);
-        }}
-        isProcessing={isProcessing}
-        customKey={customKey}
-        onToggleKeyInput={() => {
-          setShowKeyInput(true);
-          setShowLanding(false);
-        }}
-      />
+      <>
+        <LandingPage
+          onEnterWorkspace={() => setShowLanding(false)}
+          onDataLoaded={(data, raw) => {
+            handleDataLoaded(data, raw);
+            setShowLanding(false);
+          }}
+          isProcessing={isProcessing}
+          customKey={customKey}
+          onToggleKeyInput={() => {
+            setShowKeyInput(true);
+            setShowLanding(false);
+          }}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+        />
+        <AuthModal 
+          isOpen={isAuthModalOpen} 
+          onClose={() => setIsAuthModalOpen(false)} 
+          onAuthSuccess={() => {}}
+        />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
-      {/* Dynamic Header Block */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+    <>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-row overflow-hidden font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+      <WorkspacesSidebar
+        workspaces={workspaces}
+        activeWorkspaceId={activeWorkspaceId}
+        onSelectWorkspace={(id) => {
+          const ws = workspaces.find(w => w.id === id);
+          if (ws) selectWorkspace(ws);
+        }}
+        onCreateWorkspace={handleCreateWorkspace}
+        onDeleteWorkspace={handleDeleteWorkspace}
+        onRenameWorkspace={handleRenameWorkspace}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+      />
+
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
+        {/* Dynamic Header Block */}
+        <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div 
             className="flex items-center gap-3 w-full sm:w-auto cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all" 
@@ -358,6 +536,7 @@ export default function App() {
                 onClick={() => {
                   localStorage.setItem("custom_gemini_api_key", customKey);
                   setKeySavedStatus(true);
+                  syncActiveWorkspace({ customApiKey: customKey });
                   setTimeout(() => setKeySavedStatus(false), 2500);
                 }}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all shrink-0 select-none ${
@@ -376,6 +555,7 @@ export default function App() {
                     setCustomKey("");
                     localStorage.removeItem("custom_gemini_api_key");
                     setKeySavedStatus(false);
+                    syncActiveWorkspace({ customApiKey: "" });
                   }}
                   className="px-3.5 py-2 bg-slate-850 hover:bg-rose-950/40 hover:text-rose-400 border border-slate-800 hover:border-rose-900/30 rounded-xl text-xs text-slate-400 cursor-pointer transition-all shrink-0"
                   title="Clear Override Key"
@@ -755,6 +935,13 @@ export default function App() {
           </span>
         </div>
       </footer>
-    </div>
+      </div>
+      </div>
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        onAuthSuccess={() => {}}
+      />
+    </>
   );
 }
