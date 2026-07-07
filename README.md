@@ -23,48 +23,29 @@ graph TD
     classDef storage fill:#fff7ed,stroke:#ea580c,stroke-width:2px;
     classDef output fill:#faf5ff,stroke:#9333ea,stroke-width:2px;
 
-    %% Diagram Nodes
-    A[Raw Spreadsheet <br> CSV / XLSX / XLS]:::source
-    
-    subgraph Client_Side_Engine [Client-Side App Context React + Vite]
-        B[File Ingestion & Parsing]:::client
-        C[Local State Management <br> Retains 100% of Rows]:::client
-        D[Multi-Dimensional Extraction <br> Metrics & Heatmap Matrices]:::client
-        E[Smart Payload Capping <br> workspaceService.ts]:::process
-    end
+    %% Nodes
+    A[Raw Spreadsheet <br> CSV / XLSX]:::source
+    B[Client-Side Parsing <br> Vite / React]:::client
+    C[Interactive Heatmap & Charts]:::output
+    D[Smart Payload Capping Engine <br> workspaceService.ts]:::process
+    E[Cloud Firestore Sync <br> Safe, lightweight sync < 100KB]:::storage
+    F[Gemini API + Web Speech Synthesis]:::client
+    G[0.45s Visual & Audio Insights]:::output
 
-    subgraph Cloud_Persistence [Cloud Layer]
-        F[Cloud Firestore <br> Lightweight Sync < 100KB]:::storage
-    end
-
-    subgraph AI_Audio_Pipeline [Multi-Modal Pipeline]
-        G[Gemini 3.5 Flash API <br> Persona: Insight Analyst]:::output
-        H[Web Speech Synthesis Engine]:::output
-    end
-
-    I[Interactive Dashboard & Charts]:::output
-    J[Real-time Voice Summaries]:::output
-
-    %% Data Flow Connections
-    A -->|User Upload| B
+    %% Flow/Connections
+    A --> B
     B --> C
-    C --> D
-    D --> I
-    
-    C -->|Intercepts & Slices to ≤ 500 Rows| E
-    E -->|Bypasses 1MB Limit| F
-    
-    E -->|Optimized Context Payload| G
-    G -->|Ultra-fast 0.45s Latency| I
-    G -->|Structured Audio Phrasing| H
-    H --> J
+    B -->|UI Layer: Retains 100% of rows for high-fidelity views| D
+    D -->|Slices payload to ≤ 500 rows to bypass 1MB Firestore cap| E
+    E --> F
+    F --> G
 
-    %% Apply Styles
+    %% Assign classes
     class A source;
-    class B,C,D client;
-    class E process;
-    class F storage;
-    class G,H,I,J output;
+    class B,F client;
+    class D process;
+    class E storage;
+    class C,G output;
 
 1. Ingestion & Multi-Dimensional Extraction
 When a user drops a spreadsheet file (.csv, .xls, .xlsx), it is intercepted entirely on the client side. The parsing stream converts the file into a structured JSON array directly inside local React state—zero persistent server footprints.
