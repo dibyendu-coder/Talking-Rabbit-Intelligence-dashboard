@@ -15,14 +15,7 @@ Ultra-Low Latency Conversational AI: Integrates with the Gemini API to provide a
 
 🏗️ System Architecture & Data Flow
 Talking Rabbitt is built around a hybrid client-driven architecture optimized for data security and efficient database mutations:
-graph TD
-    %% Styling Definitions
-    classDef source fill:#f9fafd,stroke:#3b82f6,stroke-width:2px;
-    classDef client fill:#eff6ff,stroke:#2563eb,stroke-width:2px;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
-    classDef storage fill:#fff7ed,stroke:#ea580c,stroke-width:2px;
-    classDef output fill:#faf5ff,stroke:#9333ea,stroke-width:2px;
-
+    
     %% Nodes
     A[Raw Spreadsheet <br> CSV / XLSX]:::source
     B[Client-Side Parsing <br> Vite / React]:::client
