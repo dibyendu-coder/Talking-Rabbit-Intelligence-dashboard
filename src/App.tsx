@@ -23,7 +23,11 @@ import {
   Key,
   Check,
   Eye,
-  EyeOff
+  EyeOff,
+  Database,
+  Cpu,
+  Lock,
+  Wallet
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ParsedData, ChatMessage, AnalysisResponse, KPI, Insight, Recommendation, Forecast } from "./types";
@@ -218,7 +222,7 @@ export default function App() {
         body: JSON.stringify({
           isInitial: true,
           datasetSummary: metadata,
-          rawData: rawRows.slice(0, 1000),
+          rawData: rawRows.slice(0, 150),
         }),
       });
 
@@ -304,7 +308,7 @@ export default function App() {
         body: JSON.stringify({
           query: queryText,
           datasetSummary: parsedData,
-          rawData: rawData.slice(0, 1000),
+          rawData: rawData.slice(0, 150),
           history: chatHistory.slice(-10),
           isInitial: false,
         }),
@@ -368,13 +372,13 @@ export default function App() {
   const getInsightIcon = (type: string) => {
     switch (type) {
       case "positive":
-        return <ArrowUpRight className="w-4 h-4 text-emerald-400" />;
+        return <ArrowUpRight className="w-4 h-4 text-bitcoin-gold" />;
       case "negative":
-        return <ArrowDownRight className="w-4 h-4 text-rose-400" />;
+        return <ArrowDownRight className="w-4 h-4 text-bitcoin-burnt" />;
       case "anomaly":
-        return <AlertTriangle className="w-4 h-4 text-amber-400 animate-pulse" />;
+        return <AlertTriangle className="w-4 h-4 text-bitcoin animate-pulse" />;
       default:
-        return <Layers className="w-4 h-4 text-slate-400" />;
+        return <Layers className="w-4 h-4 text-muted" />;
     }
   };
 
@@ -406,7 +410,13 @@ export default function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-row overflow-hidden font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+      <div className="min-h-screen bg-background text-foreground flex flex-row overflow-hidden font-sans selection:bg-bitcoin/20 selection:text-bitcoin-gold">
+      
+      {/* Background grids */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-grid-pattern opacity-40" />
+      </div>
+
       <WorkspacesSidebar
         workspaces={workspaces}
         activeWorkspaceId={activeWorkspaceId}
@@ -420,76 +430,76 @@ export default function App() {
         onOpenAuth={() => setIsAuthModalOpen(true)}
       />
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto relative z-10">
         {/* Dynamic Header Block */}
-        <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+        <header className="border-b border-white/5 bg-surface/85 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div 
-            className="flex items-center gap-3 w-full sm:w-auto cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all" 
+            className="flex items-center gap-3 w-full sm:w-auto cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all group" 
             onClick={() => setShowLanding(true)}
             title="Return to Landing Page"
           >
-            <div className="p-2.5 bg-gradient-to-tr from-indigo-600 to-emerald-500 rounded-xl shadow-lg shadow-indigo-500/10">
+            <div className="p-2.5 bg-gradient-to-tr from-bitcoin-burnt to-bitcoin rounded-xl shadow-bitcoin-glow transition-colors duration-300 group-hover:border-bitcoin/50">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold tracking-tight text-white group-hover:text-bitcoin transition-colors font-heading">
                   Talking Rabbitt
                 </h1>
-                <span className="text-[9px] font-mono tracking-widest text-indigo-400 font-extrabold uppercase bg-indigo-950/40 border border-indigo-900/40 px-1.5 py-0.5 rounded-full">HOME</span>
+                <span className="text-[9px] font-mono tracking-widest text-bitcoin font-extrabold uppercase bg-bitcoin/10 border border-bitcoin/30 px-1.5 py-0.5 rounded-full">CORE</span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">AI Powered Business Intelligence Dashboard</p>
+              <p className="text-xs text-muted font-medium font-mono">Decentralized Intelligence Hub</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
             <button
               onClick={() => setShowLanding(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl border border-slate-700/80 transition-all duration-200 text-xs font-semibold cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-surface hover:bg-[#030304] text-muted hover:text-white rounded-xl border border-white/10 hover:border-bitcoin/40 transition-all duration-200 text-xs font-bold font-mono cursor-pointer"
               title="Return to Premium Landing Page"
             >
-              <span>← View Landing Page</span>
+              <span>← Landing Protocol</span>
             </button>
 
             <button
               onClick={() => setShowKeyInput(!showKeyInput)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border transition-all duration-200 shadow-sm text-xs font-semibold cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border transition-all duration-200 shadow-sm text-xs font-bold font-mono cursor-pointer ${
                 showKeyInput 
-                  ? "bg-slate-800 text-indigo-400 border-indigo-500/40" 
+                  ? "bg-[#030304] text-bitcoin border-bitcoin/50" 
                   : customKey 
-                    ? "bg-emerald-950/40 text-emerald-300 border-emerald-900/50 hover:bg-emerald-900/20" 
-                    : "bg-slate-800/80 text-slate-300 border-slate-700/80 hover:bg-slate-700 hover:text-white"
+                    ? "bg-bitcoin/10 text-bitcoin-gold border-bitcoin/35 hover:bg-bitcoin/20" 
+                    : "bg-surface text-muted border-white/10 hover:bg-[#030304] hover:text-white hover:border-bitcoin/40"
               }`}
-              title="Configure Custom API Key"
+              title="Configure Private API Key"
             >
               {customKey ? (
                 <span className="relative flex h-2 w-2 mr-0.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-bitcoin-gold opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-bitcoin"></span>
                 </span>
               ) : (
-                <Key className="w-4 h-4 shrink-0" />
+                <Key className="w-4 h-4 shrink-0 text-bitcoin" />
               )}
               <span>{customKey ? "Custom Key Active" : "Set API Key"}</span>
             </button>
 
             {parsedData && (
               <>
-                <div className="hidden md:flex items-center gap-2 bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl text-xs text-slate-300">
-                  <FileSpreadsheet className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span className="truncate max-w-[120px] font-medium">{parsedData.fileName}</span>
-                  <span className="text-slate-500 font-mono">({parsedData.rowCount} Rows)</span>
+                <div className="hidden md:flex items-center gap-2 bg-[#030304] border border-white/5 px-3.5 py-2 rounded-xl text-xs text-slate-300 font-mono">
+                  <FileSpreadsheet className="w-4 h-4 text-bitcoin shrink-0" />
+                  <span className="truncate max-w-[120px] font-bold">{parsedData.fileName}</span>
+                  <span className="text-muted font-bold">({parsedData.rowCount} Nodes)</span>
                 </div>
 
                 <button
                   id="btn-header-reset"
                   onClick={resetDashboard}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600/90 hover:bg-indigo-600 text-white rounded-xl border border-indigo-500/30 transition-all duration-200 shadow-sm cursor-pointer text-xs font-semibold"
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white hover:text-black rounded-xl border border-bitcoin/30 transition-all duration-300 shadow-bitcoin-glow hover:scale-105 cursor-pointer text-xs font-bold font-mono"
                   title="Upload another CSV / Reset Workspace"
                 >
                   <Upload className="w-4 h-4 shrink-0" />
-                  <span>Upload New CSV</span>
+                  <span>Upload New Ledger</span>
                 </button>
               </>
             )}
@@ -499,15 +509,15 @@ export default function App() {
 
       {/* Collapsible API Key settings panel */}
       {showKeyInput && (
-        <div className="bg-slate-900/95 border-b border-slate-800 px-6 py-4 backdrop-blur-md">
+        <div className="bg-surface border-b border-white/5 px-6 py-4 backdrop-blur-md relative z-30">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                <label className="text-xs font-bold text-indigo-400 block font-mono tracking-wider uppercase">GEMINI API KEY OVERRIDE</label>
+                <span className="w-2 h-2 rounded-full bg-bitcoin animate-pulse"></span>
+                <label className="text-xs font-bold text-bitcoin block font-mono tracking-widest uppercase">GEMINI API KEY OVERRIDE</label>
               </div>
-              <p className="text-[11px] text-slate-400 max-w-xl leading-relaxed">
-                Add your own private Gemini API key. When active, <span className="text-emerald-400 font-semibold">all AI-powered features</span> (automatic spreadsheet discovery, Q&A assistant, voice feedback, KPI estimation, and chart rendering) run entirely using your provided key, bypassing any shared rate limits. It is stored securely in your browser's local storage.
+              <p className="text-[11px] text-slate-300 max-w-xl leading-relaxed font-body">
+                Configure your personal Gemini API Key. Once active, <strong className="text-bitcoin-gold font-bold">all processing loads</strong> compile directly through your private quota, bypassing public rate ceilings. Value stored securely inside local memory.
               </p>
             </div>
             <div className="flex items-center gap-2.5 flex-1 md:max-w-md">
@@ -520,13 +530,13 @@ export default function App() {
                     setCustomKey(val);
                     setKeySavedStatus(false);
                   }}
-                  placeholder="Paste your Gemini API Key (AIzaSy...)"
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none transition-all pr-10"
+                  placeholder="Paste private key (AIzaSy...)"
+                  className="w-full bg-[#030304] border border-white/10 focus:border-bitcoin rounded-xl px-3.5 py-2 text-xs font-mono text-white placeholder-white/20 focus:outline-none transition-all pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setIsKeyVisible(!isKeyVisible)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-white cursor-pointer"
                 >
                   {isKeyVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -539,10 +549,10 @@ export default function App() {
                   syncActiveWorkspace({ customApiKey: customKey });
                   setTimeout(() => setKeySavedStatus(false), 2500);
                 }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all shrink-0 select-none ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold font-mono cursor-pointer transition-all shrink-0 select-none ${
                   keySavedStatus 
-                    ? "bg-emerald-600/90 hover:bg-emerald-600 text-white border border-emerald-500/20" 
-                    : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/10 hover:scale-[1.01] active:scale-[0.99]"
+                    ? "bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/20" 
+                    : "bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white hover:text-black shadow-bitcoin-glow hover:scale-[1.01]"
                 }`}
               >
                 {keySavedStatus ? <Check className="w-3.5 h-3.5 shrink-0" /> : null}
@@ -557,7 +567,7 @@ export default function App() {
                     setKeySavedStatus(false);
                     syncActiveWorkspace({ customApiKey: "" });
                   }}
-                  className="px-3.5 py-2 bg-slate-850 hover:bg-rose-950/40 hover:text-rose-400 border border-slate-800 hover:border-rose-900/30 rounded-xl text-xs text-slate-400 cursor-pointer transition-all shrink-0"
+                  className="px-3.5 py-2 bg-[#030304] hover:bg-bitcoin-burnt/10 hover:text-bitcoin border border-white/5 hover:border-bitcoin-burnt/35 rounded-xl text-xs text-muted cursor-pointer transition-all shrink-0"
                   title="Clear Override Key"
                 >
                   Clear
@@ -569,20 +579,20 @@ export default function App() {
       )}
 
       {/* Main Workspace Frame */}
-      <main className="flex-1 w-full max-w-7xl mx-auto p-6 flex flex-col">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-6 flex flex-col relative z-20">
         {!parsedData ? (
           /* Empty onboarding stage */
           <div className="flex-1 flex flex-col items-center justify-center py-10">
             <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-              <span className="text-xs uppercase font-bold tracking-widest text-indigo-400 bg-indigo-950/40 border border-indigo-900/50 px-3 py-1 rounded-full">
-                AI Agentic Workflow
+              <span className="text-xs uppercase font-mono tracking-widest font-bold text-bitcoin bg-bitcoin/10 border border-bitcoin/30 px-3 py-1 rounded-full">
+                AI CONVERSATIONAL LEDGER ROUTINES
               </span>
-              <h2 className="text-3xl font-extrabold text-slate-100 tracking-tight sm:text-4xl">
-                Bring your spreadsheets to life
+              <h2 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl font-heading">
+                Compile Your Financial Ledgers
               </h2>
-              <p className="text-base text-slate-400 leading-relaxed">
-                Upload business data, sales logs, SaaS subscription sheets, or marketing ROI metrics.
-                Our backend Agent maps structures, uncovers anomalies, forecasts trends, and communicates findings with a human voice.
+              <p className="text-base text-muted leading-relaxed font-body">
+                Import local sheets, crypto transaction records, SaaS metrics, or yield logs. 
+                Our high-reasoning protocol maps structural models, identifies anomalies, compiles metrics, and provides syntheses hands-free.
               </p>
             </div>
 
@@ -594,76 +604,80 @@ export default function App() {
             {/* Visual Dashboard and recommendation lists (Takes up 2/3 columns) */}
             <div className="xl:col-span-2 space-y-6">
               {/* Tab Toggles */}
-              <div className="flex border-b border-slate-800 pb-px">
+              <div className="flex border-b border-white/5 pb-px font-mono">
                 <button
                   id="tab-toggle-dashboard"
                   onClick={() => setActiveTab("dashboard")}
-                  className={`py-2 px-4 font-semibold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
+                  className={`py-2 px-4 font-bold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
                     activeTab === "dashboard"
-                      ? "border-indigo-500 text-indigo-400"
-                      : "border-transparent text-slate-400 hover:text-slate-200"
+                      ? "border-bitcoin text-bitcoin-gold"
+                      : "border-transparent text-muted hover:text-white"
                   }`}
                 >
-                  Intelligent Dashboard
+                  Intelligent Console
                 </button>
                 <button
                   id="tab-toggle-preview"
                   onClick={() => setActiveTab("preview")}
-                  className={`py-2 px-4 font-semibold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
+                  className={`py-2 px-4 font-bold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
                     activeTab === "preview"
-                      ? "border-indigo-500 text-indigo-400"
-                      : "border-transparent text-slate-400 hover:text-slate-200"
+                      ? "border-bitcoin text-bitcoin-gold"
+                      : "border-transparent text-muted hover:text-white"
                   }`}
                 >
-                  Raw Data Ingest ({parsedData.rowCount} rows)
+                  Raw Ledger Nodes ({parsedData.rowCount} rows)
                 </button>
               </div>
 
               {activeTab === "dashboard" ? (
                 <>
                   {/* Dynamic Visualization Agent Control Center */}
-                  <div id="vis-agent-control-center" className="bg-gradient-to-r from-slate-900 to-indigo-950/20 border border-slate-800/80 rounded-2xl p-4 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div id="vis-agent-control-center" className="bg-gradient-to-r from-surface via-[#030304]/80 to-surface border border-white/5 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                    {/* Visual Corner Accent */}
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-bitcoin rounded-tl" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-bitcoin rounded-br" />
+
                     <div className="flex items-center gap-3 w-full md:w-auto">
-                      <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl shrink-0">
-                        <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
+                      <div className="p-2.5 bg-bitcoin/10 text-bitcoin rounded-xl shrink-0">
+                        <Sparkles className="w-5 h-5 text-bitcoin animate-pulse" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-100">Dynamic Visualization Agent</h3>
-                        <p className="text-[11px] text-slate-400">Trigger smart visualizations, matrix heatmaps, and performance summaries instantly.</p>
+                        <h3 className="text-sm font-bold text-white font-heading">Dynamic Optimization Router</h3>
+                        <p className="text-[11px] text-muted font-body">Deploy instant visualization layouts, cryptographic correlation heatmaps, and summaries.</p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 w-full md:w-auto justify-end">
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto justify-end font-mono">
                       <button
                         type="button"
                         onClick={() => submitQuery("Analyze the dataset and generate a dynamic bar chart comparing the top performing metrics")}
-                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-[#030304] border border-white/5 hover:border-bitcoin/40 hover:bg-surface text-muted hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
                       >
-                        <Layers className="w-3.5 h-3.5 text-indigo-400" />
-                        <span>Dynamic Chart</span>
+                        <Layers className="w-3.5 h-3.5 text-bitcoin" />
+                        <span>Bar Chart</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => submitQuery("Perform a complete multidimensional analysis on the dataset and represent it as a beautiful visual heatmap matrix")}
-                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-[#030304] border border-white/5 hover:border-bitcoin/40 hover:bg-surface text-muted hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <span>Generate Heatmap</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-bitcoin shadow-bitcoin-glow"></span>
+                        <span>Heatmap Matrix</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => submitQuery("Extract 4 core business metrics from this dataset to compile my dynamic KPI dashboard panel")}
-                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-[#030304] border border-white/5 hover:border-bitcoin/40 hover:bg-surface text-muted hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
                       >
-                        <ArrowUpRight className="w-3.5 h-3.5 text-amber-400" />
-                        <span>KPI Dashboard</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-bitcoin-gold" />
+                        <span>KPI Cluster</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => submitQuery("Synthesize a high-level performance summary of this data highlighting trends, anomalies, and tactical action items")}
-                        className="px-3 py-1.5 bg-slate-950/80 border border-slate-800 hover:border-pink-500/50 hover:bg-slate-900 text-slate-300 hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-[#030304] border border-white/5 hover:border-bitcoin/40 hover:bg-surface text-muted hover:text-white rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
                       >
-                        <FileText className="w-3.5 h-3.5 text-pink-400" />
-                        <span>Performance Summary</span>
+                        <FileText className="w-3.5 h-3.5 text-bitcoin-burnt" />
+                        <span>Audit Synopsis</span>
                       </button>
                     </div>
                   </div>
@@ -675,18 +689,19 @@ export default function App() {
                         <div
                           key={idx}
                           id={`kpi-card-${idx}`}
-                          className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md flex flex-col justify-between"
+                          className="bg-surface border border-white/5 rounded-2xl p-4 shadow-sm flex flex-col justify-between relative overflow-hidden group"
                         >
-                          <span className="text-xs text-slate-400 font-semibold truncate uppercase tracking-wider font-mono">
+                          <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-bitcoin/20 group-hover:border-bitcoin/40 rounded-tl transition-all" />
+                          <span className="text-xs text-muted font-bold truncate uppercase tracking-widest font-mono">
                             {kpi.label}
                           </span>
                           <div className="flex items-baseline gap-2 mt-2">
-                            <span className="text-xl font-extrabold text-slate-100 font-mono tracking-tight">
+                            <span className="text-xl font-extrabold text-white font-mono tracking-tight drop-shadow-[0_0_10px_rgba(247,147,26,0.15)]">
                               {kpi.value}
                             </span>
                             <span
-                              className={`flex items-center text-xs font-semibold ${
-                                kpi.status === "up" ? "text-emerald-400" : "text-rose-400"
+                              className={`flex items-center text-xs font-mono font-bold ${
+                                kpi.status === "up" ? "text-bitcoin-gold" : "text-bitcoin-burnt"
                               }`}
                             >
                               {kpi.status === "up" ? "+" : ""}
@@ -705,21 +720,24 @@ export default function App() {
 
                   {/* Anomaly Detection List & Deep Insights */}
                   {currentResponse?.insights && (
-                    <div id="insights-panel" className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                    <div id="insights-panel" className="bg-surface border border-white/5 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-bitcoin rounded-tl" />
+                      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-bitcoin rounded-br" />
+
                       <div className="flex items-center gap-2 mb-4">
-                        <FileText className="w-5 h-5 text-indigo-400" />
-                        <h3 className="text-base font-bold text-slate-100">Deep Analytics & Trend Detection</h3>
+                        <FileText className="w-5 h-5 text-bitcoin" />
+                        <h3 className="text-base font-bold text-white font-heading">Network Audits & Anomalies</h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {currentResponse.insights.map((insight, idx) => (
                           <div
                             key={idx}
                             id={`insight-item-${idx}`}
-                            className="flex items-start gap-3 p-3.5 bg-slate-950/40 border border-slate-800 rounded-xl hover:border-slate-700 transition-colors"
+                            className="flex items-start gap-3 p-3.5 bg-[#030304]/40 border border-white/5 rounded-xl hover:border-bitcoin/30 transition-all font-body"
                           >
                             <div className="mt-0.5 shrink-0">{getInsightIcon(insight.type)}</div>
                             <div className="space-y-0.5">
-                              <span className="text-[10px] uppercase font-bold tracking-wider font-mono text-slate-500">
+                              <span className="text-[9px] uppercase font-bold tracking-widest font-mono text-muted block">
                                 {insight.type}
                               </span>
                               <p className="text-xs text-slate-300 leading-relaxed">{insight.text}</p>
@@ -740,31 +758,34 @@ export default function App() {
                 </>
               ) : (
                 /* Data Preview Ingest view */
-                <div id="spreadsheet-preview-workspace" className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg overflow-hidden">
-                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                <div id="spreadsheet-preview-workspace" className="bg-surface border border-white/5 rounded-2xl p-5 shadow-sm overflow-hidden relative">
+                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-bitcoin rounded-tl" />
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-bitcoin rounded-br" />
+
+                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
                     <div>
-                      <h3 className="text-base font-bold text-slate-100">Schema Inspection & Data Previews</h3>
-                      <p className="text-xs text-slate-400">First 5 rows of uploaded document</p>
+                      <h3 className="text-base font-bold text-white font-heading">Ledger Index Previews</h3>
+                      <p className="text-xs text-muted font-body">Targeting the first 15 records stored inside local cache</p>
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto font-mono">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-slate-800 bg-slate-950/60 font-mono text-slate-400">
+                        <tr className="border-b border-white/5 bg-[#030304] text-muted">
                           {parsedData.columns.map((col, idx) => (
-                            <th key={idx} className="p-3 font-semibold uppercase tracking-wider">
-                              {col} <span className="text-[9px] text-indigo-500">({parsedData.dataTypes[col]})</span>
+                            <th key={idx} className="p-3 font-bold uppercase tracking-wider text-[9px]">
+                              {col} <span className="text-[9px] text-bitcoin-gold">({parsedData.dataTypes[col]})</span>
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60">
+                      <tbody className="divide-y divide-white/5 text-slate-300">
                         {rawData.slice(0, 15).map((row, rIdx) => (
-                          <tr key={rIdx} className="hover:bg-slate-950/20 text-slate-300 font-mono">
+                          <tr key={rIdx} className="hover:bg-white/5 transition-all">
                             {parsedData.columns.map((col, cIdx) => (
-                              <td key={cIdx} className="p-3 truncate max-w-[180px]">
-                                {row[col]?.toString() ?? <span className="text-slate-600">NULL</span>}
+                              <td key={cIdx} className="p-3 truncate max-w-[180px] font-semibold">
+                                {row[col]?.toString() ?? <span className="text-muted italic">NULL</span>}
                               </td>
                             ))}
                           </tr>
@@ -777,27 +798,31 @@ export default function App() {
             </div>
 
             {/* Conversational Assistant & Voice Controller (Takes up 1/3 columns) */}
-            <div id="chat-sidebar" className="xl:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[650px] shadow-2xl relative overflow-hidden sticky top-24">
+            <div id="chat-sidebar" className="xl:col-span-1 bg-surface border border-white/5 rounded-2xl flex flex-col h-[650px] shadow-sm relative overflow-hidden sticky top-24">
+              {/* Visual Corner Accent */}
+              <div className="absolute top-0 left-0 w-3.5 h-3.5 border-t-2 border-l-2 border-bitcoin rounded-tl" />
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 border-b-2 border-r-2 border-bitcoin rounded-br" />
+
               {/* Header */}
-              <div className="px-5 py-4 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
+              <div className="px-5 py-4 border-b border-white/5 bg-[#030304]/60 flex items-center justify-between z-10">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-indigo-500/10 text-indigo-400 rounded-lg">
-                    <Bot className="w-4 h-4" />
+                  <div className="p-1.5 bg-bitcoin/10 text-bitcoin rounded-lg shadow-bitcoin-glow">
+                    <Bot className="w-4 h-4 text-bitcoin" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-100">Conversational AI</h3>
-                    <p className="text-[10px] text-emerald-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Voice and Text Active
+                    <h3 className="text-sm font-bold text-white font-heading">Protocol Agent Feed</h3>
+                    <p className="text-[10px] text-bitcoin-gold flex items-center gap-1 font-mono font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-bitcoin animate-pulse"></span>
+                      INTELLIGENCE LINKED
                     </p>
                   </div>
                 </div>
 
-                {isProcessing && <RefreshCw className="w-4 h-4 text-indigo-400 animate-spin" />}
+                {isProcessing && <RefreshCw className="w-4 h-4 text-bitcoin animate-spin" />}
               </div>
 
               {/* Chat bubbles viewport */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 z-10">
                 {chatHistory.map((msg) => (
                   <div
                     key={msg.id}
@@ -808,7 +833,7 @@ export default function App() {
                   >
                     <div
                       className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
-                        msg.role === "user" ? "bg-slate-800 text-slate-300" : "bg-indigo-600/10 text-indigo-400"
+                        msg.role === "user" ? "bg-[#030304] border border-white/5 text-bitcoin-gold" : "bg-bitcoin/10 text-bitcoin"
                       }`}
                     >
                       {msg.role === "user" ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
@@ -816,28 +841,29 @@ export default function App() {
 
                     <div className="space-y-1 w-full">
                       <div
-                        className={`p-3 rounded-2xl text-xs leading-relaxed border ${
+                        className={`p-3 rounded-2xl text-xs leading-relaxed border font-body ${
                           msg.role === "user"
-                            ? "bg-slate-800/80 border-slate-700 text-slate-200 rounded-tr-none"
-                            : "bg-slate-950/60 border-slate-800 text-slate-300 rounded-tl-none"
+                            ? "bg-[#030304]/90 border-white/10 text-white rounded-tr-none font-semibold"
+                            : "bg-[#030304]/40 border-white/5 text-slate-300 rounded-tl-none"
                         }`}
                       >
                         {msg.text}
                       </div>
 
                       {msg.role === "assistant" && msg.chartConfig && msg.chartConfig.chartType !== "none" && (
-                        <div className="mt-2 p-3 bg-slate-950 border border-slate-800/80 rounded-xl overflow-hidden w-full max-w-[340px] shadow-lg">
-                          <h4 className="text-[11px] font-bold text-indigo-400 truncate mb-1.5">{msg.chartConfig.title}</h4>
+                        <div className="mt-2 p-3 bg-[#030304]/60 border border-white/10 rounded-xl overflow-hidden w-full max-w-[340px] shadow-sm relative">
+                          <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-bitcoin rounded-tl" />
+                          <h4 className="text-[11px] font-bold text-bitcoin truncate mb-1.5 font-heading">{msg.chartConfig.title}</h4>
                           <div className="h-[160px] w-full">
                             <VisualChart config={msg.chartConfig} isMini={true} />
                           </div>
                           {msg.chartConfig.explanation && (
-                            <p className="text-[9px] text-slate-400 mt-1.5 leading-relaxed italic">{msg.chartConfig.explanation}</p>
+                            <p className="text-[9px] text-muted mt-1.5 leading-relaxed italic font-body">{msg.chartConfig.explanation}</p>
                           )}
                         </div>
                       )}
 
-                      <span className="text-[9px] text-slate-500 block text-right font-mono px-1">
+                      <span className="text-[9px] text-muted block text-right font-mono font-bold px-1 uppercase tracking-wider">
                         {msg.timestamp}
                       </span>
                     </div>
@@ -848,30 +874,30 @@ export default function App() {
 
               {/* System API error notices */}
               {apiError && (
-                <div id="api-error-alert" className="mx-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl flex flex-col gap-2.5 items-start">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4.5 h-4.5 shrink-0 text-rose-500 mt-0.5" />
+                <div id="api-error-alert" className="mx-4 p-3 bg-bitcoin-burnt/10 border border-bitcoin-burnt/30 text-bitcoin text-xs rounded-xl flex flex-col gap-2.5 items-start z-10 relative">
+                  <div className="flex items-start gap-2 font-mono">
+                    <AlertTriangle className="w-4.5 h-4.5 shrink-0 text-bitcoin-burnt mt-0.5 shadow-bitcoin-glow" />
                     <span>{apiError}</span>
                   </div>
                   {isQuotaError && (
-                    <div className="flex flex-wrap gap-2.5 mt-0.5">
+                    <div className="flex flex-wrap gap-2.5 mt-0.5 font-mono">
                       <button
                         type="button"
                         onClick={() => {
                           submitQuery("Please activate the paid model flow for me.");
                         }}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 rounded-lg text-[10px] font-bold cursor-pointer transition-all"
+                        className="px-3 py-1.5 bg-[#030304] hover:bg-surface text-bitcoin hover:text-bitcoin-gold border border-white/5 rounded-lg text-[9px] font-bold cursor-pointer transition-all"
                       >
-                        🚀 Activate Premium High-Quota Model
+                        🚀 PROCEED WITH PREMIUM CORE
                       </button>
                       <button
                         type="button"
                         onClick={() => {
                           setShowKeyInput(true);
                         }}
-                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[10px] font-bold shadow-md shadow-indigo-600/20 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        className="px-3 py-1.5 bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white hover:text-black rounded-lg text-[9px] font-bold shadow-bitcoin-glow cursor-pointer transition-all hover:scale-[1.02]"
                       >
-                        🔑 Enter Your Own Gemini API Key
+                        🔑 CONFIGURE API KEY OVERRIDE
                       </button>
                     </div>
                   )}
@@ -879,7 +905,7 @@ export default function App() {
               )}
 
               {/* Speech Controls & Soundwaves */}
-              <div className="p-3 border-t border-slate-800/50 bg-slate-950/20">
+              <div className="p-3 border-t border-white/5 bg-[#030304]/30 z-10">
                 <VoiceController
                   onSpeechToText={submitQuery}
                   isProcessing={isProcessing}
@@ -894,22 +920,22 @@ export default function App() {
                   e.preventDefault();
                   submitQuery(userInput);
                 }}
-                className="p-4 border-t border-slate-800 flex gap-2 bg-slate-950/40"
+                className="p-4 border-t border-white/5 flex gap-2 bg-[#030304]/40 z-10"
               >
                 <input
                   id="chat-text-input"
                   type="text"
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Ask standard dashboard questions..."
+                  placeholder="Ask financial protocol queries..."
                   disabled={isProcessing}
-                  className="flex-1 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-colors disabled:opacity-50"
+                  className="flex-1 bg-[#030304] border border-white/10 hover:border-white/20 focus:border-bitcoin rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition-colors disabled:opacity-50"
                 />
                 <button
                   id="btn-chat-submit"
                   type="submit"
                   disabled={isProcessing || !userInput.trim()}
-                  className="p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all duration-200 shadow-md shadow-indigo-600/15 disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
+                  className="p-2.5 bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white hover:text-black rounded-xl transition-all duration-300 shadow-bitcoin-glow disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -920,17 +946,17 @@ export default function App() {
       </main>
 
       {/* Footer credits */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-4 px-6 mt-12">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-[11px] text-slate-500 font-mono">
-          <span>Talking Rabbitt AI Workspace</span>
+      <footer className="border-t border-white/5 bg-[#030304] py-4 px-6 mt-12 relative z-20">
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-[10px] text-muted font-mono uppercase tracking-widest font-bold">
+          <span>Talking Rabbitt Ledger Engine</span>
           <span className="flex items-center gap-1.5">
             {customKey ? (
               <>
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                <span>Powered by Gemini 3.5 Flash (Private Key Active)</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-bitcoin shadow-bitcoin-glow animate-pulse"></span>
+                <span className="text-bitcoin-gold">Gemini 3.5 Flash (Key Override Synced)</span>
               </>
             ) : (
-              <span>Powered by Gemini 3.5 Flash (Shared Key)</span>
+              <span>Gemini 3.5 Flash (Shared Chain Channel)</span>
             )}
           </span>
         </div>

@@ -144,24 +144,24 @@ export default function VoiceController({
   };
 
   return (
-    <div id="voice-controller" className="flex items-center gap-2 p-2 bg-slate-900 border border-slate-800 rounded-xl">
+    <div id="voice-controller" className="flex items-center gap-2.5 p-2.5 bg-surface border border-white/5 rounded-2xl shadow-sm">
       {/* Listening Toggle */}
       <button
         id="btn-voice-mic"
         onClick={toggleListening}
         disabled={isProcessing}
-        className={`relative flex items-center justify-center p-3 rounded-full transition-all duration-300 ${
+        className={`relative flex items-center justify-center p-3 rounded-full transition-all duration-300 cursor-pointer ${
           isListening
-            ? "bg-rose-500 hover:bg-rose-600 text-white animate-pulse"
-            : "bg-slate-800 hover:bg-slate-700 text-slate-300"
+            ? "bg-bitcoin-burnt hover:bg-bitcoin text-white shadow-bitcoin-glow animate-pulse"
+            : "bg-[#030304] hover:bg-[#030304]/80 border border-white/5 text-muted hover:text-white"
         } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
-        title={isListening ? "Stop listening" : "Speak to dashboard"}
+        title={isListening ? "Stop listening" : "Speak node command"}
       >
         {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
         {isListening && (
           <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-bitcoin opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-bitcoin"></span>
           </span>
         )}
       </button>
@@ -174,10 +174,12 @@ export default function VoiceController({
           setSpeechEnabled(next);
           if (!next && isSpeaking) stopSpeaking();
         }}
-        className={`flex items-center justify-center p-3 rounded-full transition-all duration-300 ${
-          speechEnabled ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-slate-800 text-slate-500"
+        className={`flex items-center justify-center p-3 rounded-full transition-all duration-300 cursor-pointer ${
+          speechEnabled 
+            ? "bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white shadow-bitcoin-glow" 
+            : "bg-[#030304] border border-white/5 text-muted"
         }`}
-        title={speechEnabled ? "Mute speech" : "Unmute speech"}
+        title={speechEnabled ? "Mute synthesized speech" : "Activate synthesized speech"}
       >
         {speechEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
       </button>
@@ -187,7 +189,7 @@ export default function VoiceController({
         <button
           id="btn-voice-stop"
           onClick={stopSpeaking}
-          className="flex items-center justify-center p-3 rounded-full bg-slate-800 hover:bg-slate-700 text-amber-500 transition-all duration-300"
+          className="flex items-center justify-center p-3 rounded-full bg-[#030304] hover:bg-white/5 border border-white/5 text-bitcoin transition-all duration-300 cursor-pointer"
           title="Stop reading aloud"
         >
           <Square className="w-5 h-5" />
@@ -197,7 +199,7 @@ export default function VoiceController({
           <button
             id="btn-voice-replay"
             onClick={() => speakText(lastAssistantSpeech)}
-            className="flex items-center justify-center p-3 rounded-full bg-slate-800 hover:bg-slate-700 text-emerald-400 transition-all duration-300"
+            className="flex items-center justify-center p-3 rounded-full bg-[#030304] hover:bg-white/5 border border-white/5 text-bitcoin-gold transition-all duration-300 cursor-pointer"
             title="Repeat aloud"
           >
             <Play className="w-5 h-5" />
@@ -212,7 +214,7 @@ export default function VoiceController({
             {[...Array(6)].map((_, i) => (
               <motion.div
                 key={i}
-                className="w-1 bg-rose-500 rounded-full"
+                className="w-1 bg-bitcoin rounded-full"
                 animate={{ height: [4, 20, 4] }}
                 transition={{
                   duration: 0.6,
@@ -221,14 +223,14 @@ export default function VoiceController({
                 }}
               />
             ))}
-            <span className="text-[10px] text-rose-400 font-mono ml-2 uppercase tracking-wider">Listening...</span>
+            <span className="text-[10px] text-bitcoin font-mono font-bold ml-2 uppercase tracking-wider">Listening...</span>
           </div>
         ) : isSpeaking ? (
           <div className="flex items-end gap-1 h-full">
             {[...Array(6)].map((_, i) => (
               <motion.div
                 key={i}
-                className="w-1 bg-indigo-500 rounded-full"
+                className="w-1 bg-bitcoin-gold rounded-full"
                 animate={{ height: [4, 16, 4] }}
                 transition={{
                   duration: 0.8,
@@ -237,11 +239,11 @@ export default function VoiceController({
                 }}
               />
             ))}
-            <span className="text-[10px] text-indigo-400 font-mono ml-2 uppercase tracking-wider">Speaking...</span>
+            <span className="text-[10px] text-bitcoin-gold font-mono font-bold ml-2 uppercase tracking-wider">Speaking...</span>
           </div>
         ) : (
-          <span className="text-[11px] text-slate-500 font-medium tracking-wide">
-            {isProcessing ? "AI analyzing dataset..." : "Microphone ready"}
+          <span className="text-[11px] text-muted font-mono tracking-wide font-medium">
+            {isProcessing ? "Analyzing Node Ledger..." : "Secured Voice Feed Ready"}
           </span>
         )}
       </div>
@@ -251,8 +253,8 @@ export default function VoiceController({
         <button
           id="btn-voice-settings"
           onClick={() => setShowSettings(!showSettings)}
-          className={`p-2 rounded-lg transition-all duration-200 ${
-            showSettings ? "bg-slate-700 text-white" : "text-slate-400 hover:text-slate-200"
+          className={`p-2 rounded-lg transition-all duration-200 cursor-pointer ${
+            showSettings ? "bg-white/10 text-white" : "text-muted hover:text-white"
           }`}
           title="Voice Settings"
         >
@@ -265,28 +267,28 @@ export default function VoiceController({
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute right-0 bottom-12 w-64 p-3 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 text-slate-200"
+              className="absolute right-0 bottom-12 w-64 p-3 bg-surface border border-white/10 rounded-xl shadow-bitcoin-glow-intense z-50 text-white"
             >
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Voice Settings</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-bitcoin font-mono mb-2">Speech Synthesizer Configuration</h4>
               <div className="space-y-2">
                 <div>
-                  <label className="text-[10px] font-medium text-slate-400 block mb-1">Select Voice</label>
+                  <label className="text-[9px] font-mono font-bold text-muted block mb-1">Select Synthesis Core</label>
                   <select
                     id="select-voice-option"
                     value={selectedVoice}
                     onChange={(e) => setSelectedVoice(e.target.value)}
-                    className="w-full text-xs bg-slate-800 border border-slate-700 rounded p-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-200"
+                    className="w-full text-xs bg-[#030304] border border-white/5 rounded p-1.5 focus:outline-none focus:border-bitcoin text-white font-mono"
                   >
                     {voices.map((voice) => (
                       <option key={voice.name} value={voice.name}>
                         {voice.name} ({voice.lang})
                       </option>
                     ))}
-                    {voices.length === 0 && <option value="">No system voices found</option>}
+                    {voices.length === 0 && <option value="">No system voice channels found</option>}
                   </select>
                 </div>
-                <div className="text-[10px] text-slate-500 leading-relaxed">
-                  SpeechRecognition utilizes the browser's native engine. Ensure you grant microphone permission when prompted.
+                <div className="text-[9px] text-muted font-mono leading-relaxed mt-1">
+                  Synthesized speech reads node outputs automatically. Ensure microphone permissions are active.
                 </div>
               </div>
             </motion.div>

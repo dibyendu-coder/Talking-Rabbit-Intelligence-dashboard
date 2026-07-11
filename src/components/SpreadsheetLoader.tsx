@@ -227,8 +227,8 @@ export default function SpreadsheetLoader({ onDataLoaded, isLoading }: Spreadshe
         onDrop={handleDrop}
         className={`flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed transition-all duration-300 relative ${
           dragActive
-            ? "border-indigo-500 bg-indigo-500/10 scale-[1.01]"
-            : "border-slate-700 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-900/80"
+            ? "border-bitcoin bg-bitcoin/5 scale-[1.01] shadow-bitcoin-glow"
+            : "border-white/10 bg-[#030304]/60 hover:border-bitcoin/30 hover:bg-[#030304]/80"
         } ${isLoading ? "opacity-65 pointer-events-none" : ""}`}
       >
         <input
@@ -241,33 +241,33 @@ export default function SpreadsheetLoader({ onDataLoaded, isLoading }: Spreadshe
         />
 
         <div className="flex flex-col items-center space-y-3 text-center">
-          <div className="p-4 bg-slate-800/80 border border-slate-700 rounded-full text-indigo-400">
-            <Upload className="w-8 h-8 animate-bounce" />
+          <div className="p-4 bg-surface border border-white/5 rounded-full text-bitcoin shadow-bitcoin-glow">
+            <Upload className="w-8 h-8 animate-bounce text-bitcoin" />
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-slate-100">Upload business analytics file</h3>
-            <p className="text-sm text-slate-400">
+            <h3 className="text-lg font-bold text-white font-heading">Import financial data or transaction ledger</h3>
+            <p className="text-sm text-muted">
               Drag and drop your spreadsheet here, or{" "}
               <button
                 id="btn-upload-browse"
                 onClick={onButtonClick}
-                className="text-indigo-400 hover:text-indigo-300 font-medium underline"
+                className="text-bitcoin hover:text-bitcoin-gold font-semibold underline cursor-pointer"
               >
                 browse local files
               </button>
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
-            <FileSpreadsheet className="w-4 h-4" />
-            <span>Supports CSV, XLS, XLSX spreadsheets</span>
+          <div className="flex items-center gap-1.5 text-xs text-muted font-mono">
+            <FileSpreadsheet className="w-4 h-4 text-bitcoin-gold" />
+            <span>Supports CSV, XLS, XLSX formats</span>
           </div>
         </div>
 
         {error && (
-          <div id="loader-error" className="mt-4 flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs text-center">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div id="loader-error" className="mt-4 flex items-center gap-2 p-3 bg-bitcoin-burnt/10 border border-bitcoin-burnt/30 rounded-xl text-bitcoin-burnt text-xs text-center font-mono">
+            <AlertCircle className="w-4 h-4 shrink-0 text-bitcoin" />
             <span>{error}</span>
           </div>
         )}
@@ -275,9 +275,9 @@ export default function SpreadsheetLoader({ onDataLoaded, isLoading }: Spreadshe
 
       {/* Structured Samples Selector */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-slate-300 font-medium">
-          <FolderOpen className="w-4 h-4 text-emerald-400" />
-          <span>Or proceed immediately with interactive samples:</span>
+        <div className="flex items-center gap-2 text-slate-300 font-semibold font-mono text-xs tracking-wider">
+          <FolderOpen className="w-4 h-4 text-bitcoin-gold" />
+          <span>OR PROCEED IMMEDIATELY WITH PROTOCOL TEMPLATES:</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -287,18 +287,22 @@ export default function SpreadsheetLoader({ onDataLoaded, isLoading }: Spreadshe
               id={`btn-sample-dataset-${idx}`}
               onClick={() => selectSample(sample)}
               disabled={isLoading}
-              className="flex flex-col items-start p-4 text-left bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 rounded-2xl transition-all duration-300 group cursor-pointer"
+              className="flex flex-col items-start p-4 text-left bg-surface border border-white/5 hover:border-bitcoin/30 hover:bg-[#030304]/80 rounded-2xl transition-all duration-300 group cursor-pointer shadow-sm relative overflow-hidden"
             >
+              {/* Subtle Corner Accents on Hover */}
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-bitcoin rounded-tl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-bitcoin rounded-br opacity-0 group-hover:opacity-100 transition-opacity" />
+
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="text-2xl">{sample.icon}</span>
-                <span className="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 bg-slate-800 text-slate-400 border border-slate-700 rounded-full group-hover:bg-indigo-600/20 group-hover:border-indigo-500/40 group-hover:text-indigo-300 transition-colors">
-                  Analyze
+                <span className="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 bg-[#030304] text-muted border border-white/5 rounded-full group-hover:bg-bitcoin/10 group-hover:border-bitcoin/35 group-hover:text-bitcoin-gold transition-all">
+                  Load Node
                 </span>
               </div>
-              <h4 className="text-sm font-semibold text-slate-200 group-hover:text-indigo-400 transition-colors">
+              <h4 className="text-sm font-bold text-white group-hover:text-bitcoin transition-colors font-heading">
                 {sample.name}
               </h4>
-              <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-muted mt-1 line-clamp-2 leading-relaxed">
                 {sample.description}
               </p>
             </button>

@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  Sparkles
+  Sparkles,
+  Wallet
 } from "lucide-react";
 import { auth } from "../lib/firebase";
 import { signOut } from "firebase/auth";
@@ -83,7 +84,7 @@ export default function WorkspacesSidebar({
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed left-4 top-20 z-40 p-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[#00F5D4] rounded-xl hover:border-[#00F5D4]/40 transition-all duration-300 shadow-xl cursor-pointer"
+          className="fixed left-4 top-20 z-40 p-2.5 bg-surface hover:bg-surface/80 border border-bitcoin/30 text-bitcoin rounded-xl hover:border-bitcoin transition-all duration-300 shadow-bitcoin-glow cursor-pointer"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -96,17 +97,17 @@ export default function WorkspacesSidebar({
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="relative shrink-0 h-full border-r border-slate-900 bg-slate-950 flex flex-col justify-between z-30"
+            className="relative shrink-0 h-full border-r border-white/5 bg-surface flex flex-col justify-between z-30"
           >
             {/* Header with toggle close */}
-            <div className="p-4 border-b border-slate-900 flex items-center justify-between">
+            <div className="p-4 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Database className="w-4 h-4 text-[#00F5D4]" />
+                <Database className="w-4 h-4 text-bitcoin" />
                 <span className="text-xs font-bold text-slate-200 uppercase tracking-widest font-mono">Workspaces</span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-slate-500 hover:text-white bg-slate-900/40 border border-slate-800/40 rounded-md hover:border-slate-750 transition-colors cursor-pointer"
+                className="p-1 text-muted hover:text-white bg-[#030304]/40 border border-white/5 rounded-md hover:border-white/10 transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -120,13 +121,13 @@ export default function WorkspacesSidebar({
                   {!isCreating ? (
                     <button
                       onClick={() => setIsCreating(true)}
-                      className="w-full py-2.5 px-3 border border-dashed border-slate-800 hover:border-[#00F5D4]/30 hover:bg-slate-900/30 text-slate-400 hover:text-[#00F5D4] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer"
+                      className="w-full py-2.5 px-3 border border-dashed border-white/10 hover:border-bitcoin/30 hover:bg-white/5 text-muted hover:text-bitcoin rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer font-mono"
                     >
                       <Plus className="w-4 h-4" />
-                      <span>New Workspace</span>
+                      <span>New Ledger Node</span>
                     </button>
                   ) : (
-                    <form onSubmit={handleCreate} className="bg-slate-900/50 border border-slate-800 rounded-xl p-3 space-y-2">
+                    <form onSubmit={handleCreate} className="bg-[#030304]/50 border border-white/5 rounded-xl p-3 space-y-2">
                       <input
                         type="text"
                         autoFocus
@@ -134,21 +135,21 @@ export default function WorkspacesSidebar({
                         placeholder="Workspace name..."
                         value={newWorkspaceName}
                         onChange={(e) => setNewWorkspaceName(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-[#00F5D4]/40"
+                        className="w-full px-2.5 py-1.5 bg-[#030304] border border-white/10 rounded-lg text-xs text-white placeholder-white/25 focus:outline-none focus:border-bitcoin/50"
                       />
                       <div className="flex justify-end gap-1.5">
                         <button
                           type="button"
                           onClick={() => setIsCreating(false)}
-                          className="p-1 bg-slate-950 border border-slate-800 text-slate-400 hover:text-white rounded-lg cursor-pointer"
+                          className="p-1 bg-[#030304] border border-white/5 text-muted hover:text-white rounded-lg cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="submit"
-                          className="px-2 py-1 bg-indigo-600 hover:bg-[#00F5D4] text-white hover:text-slate-950 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                          className="px-2.5 py-1 bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white hover:text-black rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer shadow-bitcoin-glow"
                         >
-                          Create
+                          Deploy
                         </button>
                       </div>
                     </form>
@@ -157,7 +158,7 @@ export default function WorkspacesSidebar({
                   {/* Workspaces list */}
                   <div className="space-y-1.5">
                     {workspaces.length === 0 ? (
-                      <p className="text-[11px] text-slate-500 italic text-center py-4">No active workspaces. Click above to create.</p>
+                      <p className="text-[11px] text-muted italic text-center py-4 font-mono">No active nodes. Deploy above.</p>
                     ) : (
                       workspaces.map((ws) => {
                         const isActive = ws.id === activeWorkspaceId;
@@ -169,15 +170,15 @@ export default function WorkspacesSidebar({
                             key={ws.id}
                             className={`group relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-300 ${
                               isActive
-                                ? "bg-slate-900 border-slate-800 text-white shadow-sm"
-                                : "border-transparent text-slate-400 hover:bg-slate-900/40 hover:text-slate-200"
+                                ? "bg-[#030304] border-bitcoin/30 text-white shadow-bitcoin-glow"
+                                : "border-transparent text-muted hover:bg-white/5 hover:text-white"
                             }`}
                           >
                             <div className="flex items-center gap-2.5 flex-1 min-w-0">
                               {isActive ? (
-                                <FolderOpen className="w-4 h-4 text-[#00F5D4] shrink-0" />
+                                <FolderOpen className="w-4 h-4 text-bitcoin-gold shrink-0" />
                               ) : (
-                                <Folder className="w-4 h-4 text-slate-500 shrink-0" />
+                                <Folder className="w-4 h-4 text-muted shrink-0" />
                               )}
 
                               {isEditing ? (
@@ -188,7 +189,7 @@ export default function WorkspacesSidebar({
                                   onChange={(e) => setEditValue(e.target.value)}
                                   onBlur={() => saveRename(ws.id)}
                                   onKeyDown={(e) => e.key === "Enter" && saveRename(ws.id)}
-                                  className="w-full bg-slate-950 border border-slate-850 px-1.5 py-0.5 rounded text-xs text-white focus:outline-none"
+                                  className="w-full bg-[#030304] border border-white/10 px-1.5 py-0.5 rounded text-xs text-white focus:outline-none focus:border-bitcoin"
                                 />
                               ) : (
                                 <button
@@ -205,14 +206,14 @@ export default function WorkspacesSidebar({
                               <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity shrink-0">
                                 <button
                                   onClick={() => startRename(ws.id, ws.name)}
-                                  className="p-1 hover:text-[#00F5D4] rounded transition-colors cursor-pointer"
+                                  className="p-1 hover:text-bitcoin rounded transition-colors cursor-pointer"
                                   title="Rename"
                                 >
                                   <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(ws.id)}
-                                  className="p-1 hover:text-[#FF6B6B] rounded transition-colors cursor-pointer"
+                                  className="p-1 hover:text-bitcoin-burnt rounded transition-colors cursor-pointer"
                                   title="Delete"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -222,17 +223,17 @@ export default function WorkspacesSidebar({
 
                             {/* Confirm Delete state */}
                             {isConfirmingDelete && (
-                              <div className="flex items-center gap-1 shrink-0 z-10 bg-slate-900 px-1.5 rounded-lg border border-slate-800">
-                                <span className="text-[9px] text-slate-400 font-mono">Delete?</span>
+                              <div className="flex items-center gap-1 shrink-0 z-10 bg-[#030304] px-1.5 py-0.5 rounded-lg border border-white/10">
+                                <span className="text-[9px] text-muted font-mono">Prune?</span>
                                 <button
                                   onClick={() => onDeleteWorkspace(ws.id)}
-                                  className="text-[9px] text-red-400 hover:text-red-300 font-bold px-1 py-0.5 cursor-pointer"
+                                  className="text-[9px] text-bitcoin-burnt hover:text-bitcoin font-bold px-1 py-0.5 cursor-pointer"
                                 >
                                   Yes
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="text-[9px] text-slate-400 hover:text-white px-1 py-0.5 cursor-pointer"
+                                  className="text-[9px] text-muted hover:text-white px-1 py-0.5 cursor-pointer"
                                 >
                                   No
                                 </button>
@@ -245,39 +246,39 @@ export default function WorkspacesSidebar({
                   </div>
                 </>
               ) : (
-                <div className="text-center py-6 px-4 space-y-3 bg-slate-900/30 border border-slate-900 rounded-2xl">
-                  <Sparkles className="w-5 h-5 text-[#00F5D4] mx-auto animate-pulse" />
-                  <h4 className="text-xs font-bold text-slate-200">Sync with SaaS Profile</h4>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Create a free profile to secure multiple independent workspaces, save custom configurations, and preserve your analytical insights.
+                <div className="text-center py-6 px-4 space-y-3 bg-[#030304]/30 border border-white/5 rounded-2xl">
+                  <Sparkles className="w-5 h-5 text-bitcoin-gold mx-auto animate-pulse" />
+                  <h4 className="text-xs font-bold text-white font-heading">Protocol Cloud Sync</h4>
+                  <p className="text-[11px] text-muted leading-relaxed font-body">
+                    Secure multiple independent analytical workspaces, save custom configurations, and preserve your analytical insights in the decentralized cloud ledger.
                   </p>
                   <button
                     onClick={onOpenAuth}
-                    className="w-full py-2 bg-[#00F5D4] text-slate-950 hover:bg-[#00e1c2] rounded-xl text-xs font-bold transition-all duration-300 shadow-md cursor-pointer"
+                    className="w-full py-2 bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white hover:text-black font-mono rounded-xl text-xs font-bold transition-all duration-300 shadow-bitcoin-glow hover:shadow-bitcoin-glow-intense cursor-pointer"
                   >
-                    Set Up Sync
+                    Sync Profile
                   </button>
                 </div>
               )}
             </div>
 
             {/* Footer Profile Area */}
-            <div className="p-4 border-t border-slate-900 bg-slate-950/80">
+            <div className="p-4 border-t border-white/5 bg-[#030304]/80">
               {currentUser ? (
                 <div className="flex items-center justify-between gap-2.5">
                   <div className="flex items-center gap-2 overflow-hidden">
-                    <div className="p-2 bg-indigo-600/15 border border-indigo-500/25 rounded-xl shrink-0">
-                      <User className="w-4 h-4 text-[#00F5D4]" />
+                    <div className="p-2 bg-bitcoin/10 border border-bitcoin/30 rounded-xl shrink-0">
+                      <User className="w-4 h-4 text-bitcoin-gold" />
                     </div>
                     <div className="overflow-hidden">
-                      <h4 className="text-xs font-bold text-slate-200 truncate">{currentUser.displayName || "Subscriber"}</h4>
-                      <p className="text-[10px] text-slate-400 truncate">{currentUser.email}</p>
+                      <h4 className="text-xs font-bold text-white truncate">{currentUser.displayName || "Key Custodian"}</h4>
+                      <p className="text-[10px] text-muted truncate font-mono">{currentUser.email}</p>
                     </div>
                   </div>
                   <button
                     onClick={handleSignOut}
-                    className="p-2 text-slate-500 hover:text-white bg-slate-900/40 border border-slate-800/40 rounded-xl hover:border-slate-700 transition-colors cursor-pointer"
-                    title="Sign Out"
+                    className="p-2 text-muted hover:text-white bg-[#030304]/40 border border-white/5 rounded-xl hover:border-white/10 transition-colors cursor-pointer"
+                    title="Disconnect"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                   </button>
@@ -285,10 +286,10 @@ export default function WorkspacesSidebar({
               ) : (
                 <button
                   onClick={onOpenAuth}
-                  className="w-full py-2.5 bg-slate-900 hover:bg-slate-850 hover:border-[#00F5D4]/40 border border-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-2.5 bg-[#030304] hover:bg-white/5 hover:border-bitcoin/40 border border-white/5 text-muted hover:text-white rounded-xl text-xs font-bold font-mono transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <User className="w-4 h-4 text-[#00F5D4]" />
-                  <span>SaaS Login / Register</span>
+                  <Wallet className="w-4 h-4 text-bitcoin" />
+                  <span>Connect Analytics Profile</span>
                 </button>
               )}
             </div>

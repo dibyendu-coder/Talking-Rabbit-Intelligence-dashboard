@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  ResponsiveContainer,
   BarChart,
   Bar,
   LineChart,
@@ -25,14 +24,14 @@ interface VisualChartProps {
 }
 
 const COLORS = [
-  "#6366f1", // Indigo
-  "#10b981", // Emerald
-  "#f59e0b", // Amber
-  "#ef4444", // Rose
-  "#06b6d4", // Cyan
-  "#a855f7", // Purple
-  "#3b82f6", // Blue
-  "#e11d48", // Rose deep
+  "#F7931A", // Bitcoin Orange
+  "#FFD600", // Digital Gold
+  "#EA580C", // Burnt Orange
+  "#F59E0B", // Amber
+  "#EF4444", // Rose
+  "#EAB308", // Yellow
+  "#CA8A04", // Dark Gold
+  "#F97316", // Orange secondary
 ];
 
 export default function VisualChart({ config, isMini = false }: VisualChartProps) {
@@ -80,10 +79,10 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
   if (chartType === "none" || !data || data.length === 0) {
     if (isMini) return null;
     return (
-      <div id="visual-chart-empty" className="flex flex-col items-center justify-center h-72 border border-slate-800 bg-slate-950/40 rounded-2xl text-slate-500 text-sm">
-        <Presentation className="w-8 h-8 mb-2 text-slate-600" />
-        <span>No dynamic chart requested for this query.</span>
-        <span className="text-xs text-slate-600 mt-1">Ask a question like "Which category performed best?" to trigger graphics</span>
+      <div id="visual-chart-empty" className="flex flex-col items-center justify-center h-72 border border-white/5 bg-[#030304]/40 rounded-2xl text-muted text-sm font-mono">
+        <Presentation className="w-8 h-8 mb-2 text-bitcoin shadow-bitcoin-glow" />
+        <span className="font-bold text-white font-heading">No dynamic ledger charts compiled.</span>
+        <span className="text-xs text-muted mt-1">Ask a prompt like "Show yield projection categories" to trigger graphics</span>
       </div>
     );
   }
@@ -229,10 +228,10 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
 
     if (processedData.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-slate-500 py-6 px-4 text-center">
-          <Presentation className="w-6 h-6 mb-1 text-indigo-400 animate-pulse" />
-          <span className="text-xs font-semibold text-slate-300">No active records match the selected axes</span>
-          <span className="text-[10px] text-slate-500 mt-0.5">Try asking: "Show Sales by Category" or "What is the breakdown of Region?"</span>
+        <div className="flex flex-col items-center justify-center h-full text-muted py-6 px-4 text-center font-mono">
+          <Presentation className="w-6 h-6 mb-1 text-bitcoin animate-pulse" />
+          <span className="text-xs font-bold text-white">No active records match the selected axes</span>
+          <span className="text-[10px] text-muted mt-0.5">Try: "Show Volume by Block" or "Compare yield segments"</span>
         </div>
       );
     }
@@ -241,7 +240,7 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
       case "bar":
         return (
           <BarChart width={chartW} height={chartH} data={processedData} margin={{ top: 10, right: 10, left: -15, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis
               dataKey={xAxisKey}
               stroke="#94a3b8"
@@ -261,17 +260,17 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
               width={isMini ? 30 : 45}
             />
             <Tooltip
-              cursor={{ fill: "#334155", opacity: 0.15 }}
+              cursor={{ fill: "rgba(247, 147, 26, 0.05)" }}
               contentStyle={{
-                backgroundColor: "#0f172a",
-                borderColor: "#334155",
+                backgroundColor: "#0F1115",
+                borderColor: "rgba(247, 147, 26, 0.3)",
                 borderRadius: "12px",
                 color: "#f1f5f9",
                 fontSize: isMini ? 10 : 12,
               }}
             />
             {!isMini && <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />}
-            <Bar dataKey={yAxisKey} fill="#6366f1" radius={[4, 4, 0, 0]}>
+            <Bar dataKey={yAxisKey} fill="#F7931A" radius={[4, 4, 0, 0]}>
               {processedData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
@@ -282,7 +281,7 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
       case "line":
         return (
           <LineChart width={chartW} height={chartH} data={processedData} margin={{ top: 10, right: 10, left: -15, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis
               dataKey={xAxisKey}
               stroke="#94a3b8"
@@ -303,8 +302,8 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#0f172a",
-                borderColor: "#334155",
+                backgroundColor: "#0F1115",
+                borderColor: "rgba(247, 147, 26, 0.3)",
                 borderRadius: "12px",
                 color: "#f1f5f9",
                 fontSize: isMini ? 10 : 12,
@@ -314,10 +313,10 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
             <Line
               type="monotone"
               dataKey={yAxisKey}
-              stroke="#818cf8"
+              stroke="#F7931A"
               strokeWidth={isMini ? 1.5 : 3}
-              activeDot={{ r: isMini ? 4 : 8 }}
-              dot={{ strokeWidth: isMini ? 1 : 2, r: isMini ? 2 : 4 }}
+              activeDot={{ r: isMini ? 4 : 8, strokeWidth: 0, fill: "#FFD600" }}
+              dot={{ strokeWidth: isMini ? 1 : 2, r: isMini ? 2 : 4, stroke: "#EA580C" }}
             />
           </LineChart>
         );
@@ -326,12 +325,12 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
         return (
           <AreaChart width={chartW} height={chartH} data={processedData} margin={{ top: 10, right: 10, left: -15, bottom: 5 }}>
             <defs>
-              <linearGradient id="areaColor" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              <linearGradient id="bitcoinAreaColor" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#F7931A" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#F7931A" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis
               dataKey={xAxisKey}
               stroke="#94a3b8"
@@ -352,8 +351,8 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#0f172a",
-                borderColor: "#334155",
+                backgroundColor: "#0F1115",
+                borderColor: "rgba(247, 147, 26, 0.3)",
                 borderRadius: "12px",
                 color: "#f1f5f9",
                 fontSize: isMini ? 10 : 12,
@@ -363,10 +362,10 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
             <Area
               type="monotone"
               dataKey={yAxisKey}
-              stroke="#10b981"
+              stroke="#F7931A"
               strokeWidth={isMini ? 1.5 : 2.5}
               fillOpacity={1}
-              fill="url(#areaColor)"
+              fill="url(#bitcoinAreaColor)"
             />
           </AreaChart>
         );
@@ -384,7 +383,7 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
               dataKey={yAxisKey}
               nameKey={xAxisKey}
               label={isMini ? false : ({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-              labelLine={isMini ? false : { stroke: "#475569", strokeWidth: 1 }}
+              labelLine={isMini ? false : { stroke: "rgba(255,255,255,0.1)", strokeWidth: 1 }}
             >
               {processedData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -392,8 +391,8 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: "#0f172a",
-                borderColor: "#334155",
+                backgroundColor: "#0F1115",
+                borderColor: "rgba(247, 147, 26, 0.3)",
                 borderRadius: "12px",
                 color: "#f1f5f9",
                 fontSize: isMini ? 10 : 12,
@@ -455,14 +454,14 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
 
         const getCellBg = (val: number) => {
           const ratio = (val - minVal) / range;
-          if (ratio < 0.25) return "bg-indigo-950/20 text-indigo-400 border-slate-800";
-          if (ratio < 0.5) return "bg-indigo-900/40 text-indigo-300 border-indigo-900/50";
-          if (ratio < 0.75) return "bg-indigo-700/60 text-indigo-100 border-indigo-700/40";
-          return "bg-emerald-600/80 text-white font-bold border-emerald-500/40";
+          if (ratio < 0.25) return "bg-[#030304] text-muted border-white/5";
+          if (ratio < 0.5) return "bg-bitcoin/10 text-bitcoin border-bitcoin/25 hover:bg-bitcoin/15";
+          if (ratio < 0.75) return "bg-bitcoin/20 text-bitcoin-gold border-bitcoin/45 hover:bg-bitcoin/25";
+          return "bg-bitcoin/85 text-black font-extrabold border-bitcoin shadow-bitcoin-glow hover:scale-[1.04]";
         };
 
         return (
-          <div className="w-full h-full overflow-auto flex flex-col justify-between py-2">
+          <div className="w-full h-full overflow-auto flex flex-col justify-between py-2 font-mono">
             <div className="min-w-[450px] overflow-x-auto pr-2">
               <div 
                 className="grid gap-2 text-center"
@@ -470,18 +469,18 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
                   gridTemplateColumns: `100px repeat(${cols.length}, minmax(70px, 1fr))` 
                 }}
               >
-                <div className="text-left text-[10px] uppercase font-bold tracking-wider text-slate-500 self-center font-mono truncate p-1">
-                  Metric Correlation
+                <div className="text-left text-[10px] uppercase font-bold tracking-wider text-muted self-center truncate p-1">
+                  Metric Nodes
                 </div>
                 {cols.map((col, idx) => (
-                  <div key={idx} className="text-[10px] font-bold text-slate-400 uppercase tracking-wide font-mono truncate p-1" title={col}>
+                  <div key={idx} className="text-[10px] font-bold text-slate-300 uppercase tracking-wide truncate p-1" title={col}>
                     {col}
                   </div>
                 ))}
 
                 {rows.map((row, rIdx) => (
                   <React.Fragment key={rIdx}>
-                    <div className="text-left text-[10px] font-bold text-slate-400 font-mono truncate p-1 bg-slate-950/40 border border-slate-800/40 rounded-lg flex items-center px-2">
+                    <div className="text-left text-[10px] font-bold text-slate-300 truncate p-1 bg-[#030304]/60 border border-white/5 rounded-lg flex items-center px-2">
                       {row}
                     </div>
                     {cols.map((col, cIdx) => {
@@ -490,7 +489,7 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
                       return (
                         <div
                           key={cIdx}
-                          className={`p-3 rounded-xl border text-xs font-mono transition-all duration-200 hover:scale-[1.03] hover:shadow-lg flex flex-col justify-center items-center h-14 ${getCellBg(val)}`}
+                          className={`p-3 rounded-xl border text-xs transition-all duration-200 hover:shadow-bitcoin-glow flex flex-col justify-center items-center h-14 cursor-pointer ${getCellBg(val)}`}
                           title={`${row} x ${col}: ${isPercent ? `${val.toFixed(1)}%` : formatYAxis(val)}`}
                         >
                           <span className="text-[11px] font-extrabold tracking-tight">
@@ -505,15 +504,15 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
             </div>
 
             {!isMini && (
-              <div className="mt-4 flex items-center justify-end gap-2.5 text-[10px] font-mono text-slate-400 px-2 flex-wrap">
-                <span>Intensity Scale:</span>
-                <div className="flex items-center gap-1 bg-slate-950/40 p-1.5 border border-slate-800/80 rounded-xl">
-                  <span className="w-2.5 h-2.5 rounded bg-indigo-950/20 border border-slate-800"></span>
-                  <span className="text-slate-500 mr-2">Low ({isPercent ? `${minVal.toFixed(0)}%` : formatYAxis(minVal)})</span>
-                  <span className="w-2.5 h-2.5 rounded bg-indigo-900/40 border border-indigo-900/50"></span>
-                  <span className="w-2.5 h-2.5 rounded bg-indigo-700/60 border border-indigo-700/40"></span>
-                  <span className="w-2.5 h-2.5 rounded bg-emerald-600/80 border border-emerald-500/40"></span>
-                  <span className="text-slate-300">High ({isPercent ? `${maxVal.toFixed(0)}%` : formatYAxis(maxVal)})</span>
+              <div className="mt-4 flex items-center justify-end gap-2.5 text-[10px] text-muted px-2 flex-wrap">
+                <span>Density scale:</span>
+                <div className="flex items-center gap-1 bg-[#030304]/60 p-1.5 border border-white/5 rounded-xl">
+                  <span className="w-2.5 h-2.5 rounded bg-[#030304] border border-white/5"></span>
+                  <span className="text-muted mr-2">Low ({isPercent ? `${minVal.toFixed(0)}%` : formatYAxis(minVal)})</span>
+                  <span className="w-2.5 h-2.5 rounded bg-bitcoin/10 border border-bitcoin/20"></span>
+                  <span className="w-2.5 h-2.5 rounded bg-bitcoin/20 border border-bitcoin/40"></span>
+                  <span className="w-2.5 h-2.5 rounded bg-bitcoin/80 border border-bitcoin"></span>
+                  <span className="text-white">High ({isPercent ? `${maxVal.toFixed(0)}%` : formatYAxis(maxVal)})</span>
                 </div>
               </div>
             )}
@@ -537,27 +536,31 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
   return (
     <div
       id="visual-chart-container"
-      className={`relative flex flex-col border border-slate-800 bg-slate-900 rounded-2xl p-5 shadow-lg overflow-hidden transition-all duration-300 ${
+      className={`relative flex flex-col border border-white/5 bg-surface rounded-2xl p-5 shadow-sm overflow-hidden transition-all duration-300 ${
         isFullscreen
-          ? "fixed inset-4 z-50 bg-slate-900 border-2 border-indigo-500/50"
+          ? "fixed inset-4 z-50 bg-surface border-2 border-bitcoin/50"
           : "h-[400px]"
       }`}
     >
+      {/* Visual Corner Accents */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-bitcoin rounded-tl" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-bitcoin rounded-br" />
+
       {/* Title block */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5 flex-wrap gap-3">
         <div>
-          <h3 className="text-base font-bold text-slate-100 tracking-tight">{title}</h3>
-          <p className="text-xs text-slate-400 capitalize tracking-wide font-mono mt-0.5">
-            Visualization Style: {activeChartType}
+          <h3 className="text-base font-bold text-white tracking-tight font-heading">{title}</h3>
+          <p className="text-xs text-bitcoin capitalize tracking-widest font-mono mt-0.5 font-bold">
+            PROTOCOL VIEWPORTS: {activeChartType}
           </p>
-          <span className="text-[10px] text-slate-500 font-mono block mt-1">
-            Schema: x="{xAxisKey}", y="{yAxisKey}" | Rows: {processedData.length} | First: {processedData[0] ? JSON.stringify(processedData[0]).substring(0, 50) : "none"}
+          <span className="text-[10px] text-muted font-mono block mt-1">
+            Metrics: x="{xAxisKey}", y="{yAxisKey}" | Rows: {processedData.length}
           </span>
         </div>
 
         <div className="flex items-center gap-1.5 flex-wrap">
           {/* Interactive Chart Type Selector */}
-          <div className="flex bg-slate-950/60 p-1 border border-slate-800/80 rounded-xl items-center gap-1">
+          <div className="flex bg-[#030304]/60 p-1 border border-white/5 rounded-xl items-center gap-1">
             {(["bar", "line", "area", "pie", "heatmap"] as const).map((type) => (
               <button
                 key={type}
@@ -565,10 +568,10 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
                   setActiveChartType(type);
                   setShowTable(false);
                 }}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
+                className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold uppercase tracking-wider cursor-pointer transition-all ${
                   activeChartType === type && !showTable
-                    ? "bg-indigo-600/90 text-white shadow"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-850"
+                    ? "bg-gradient-to-r from-bitcoin-burnt to-bitcoin text-white shadow-bitcoin-glow"
+                    : "text-muted hover:text-white"
                 }`}
               >
                 {type}
@@ -578,17 +581,17 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
 
           <button
             onClick={() => setShowTable(!showTable)}
-            className="px-2.5 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-950/40 border border-indigo-900/30 rounded-lg hover:bg-indigo-900/30 transition-colors flex items-center gap-1.5 text-[11px] font-semibold cursor-pointer"
-            title={showTable ? "Show Chart" : "Show Data Table"}
+            className="px-2.5 py-1.5 text-bitcoin hover:text-bitcoin-gold bg-bitcoin/10 border border-bitcoin/20 rounded-lg hover:bg-bitcoin/20 transition-all flex items-center gap-1.5 text-[11px] font-bold font-mono cursor-pointer"
+            title={showTable ? "Show Chart visual" : "Show Data Table ledger"}
           >
             {showTable ? <Presentation className="w-3.5 h-3.5" /> : <Table className="w-3.5 h-3.5" />}
-            <span>{showTable ? "Chart" : "Data Table"}</span>
+            <span>{showTable ? "Chart" : "Ledger Table"}</span>
           </button>
 
           <button
             id="btn-chart-expand"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 text-slate-400 hover:text-slate-100 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
+            className="p-1.5 text-muted hover:text-white bg-[#030304] border border-white/5 rounded-lg hover:border-white/10 transition-colors cursor-pointer"
             title={isFullscreen ? "Minimize" : "Full Screen"}
           >
             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -599,19 +602,19 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
       {/* Chart workspace */}
       <div ref={containerRef} className={`w-full relative ${isFullscreen ? "h-[65vh]" : "h-[220px]"} flex flex-col justify-center`}>
         {showTable ? (
-          <div className="overflow-auto max-h-full border border-slate-800 rounded-xl bg-slate-950/40">
+          <div className="overflow-auto max-h-full border border-white/5 rounded-xl bg-[#030304]/60 font-mono">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80 font-mono text-slate-400 uppercase tracking-wider text-[10px]">
+                <tr className="border-b border-white/5 bg-[#030304] text-muted uppercase tracking-wider text-[9px] font-bold">
                   <th className="p-3 font-semibold">{xAxisKey}</th>
                   <th className="p-3 font-semibold text-right">{yAxisKey}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 font-medium">
+              <tbody className="divide-y divide-white/5 font-semibold text-slate-300">
                 {processedData.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-900/40 transition-colors">
-                    <td className="p-3 text-slate-200">{String(row[xAxisKey] || "")}</td>
-                    <td className="p-3 text-slate-100 text-right font-mono">
+                  <tr key={idx} className="hover:bg-white/5 transition-colors">
+                    <td className="p-3">{String(row[xAxisKey] || "")}</td>
+                    <td className="p-3 text-right text-white">
                       {isPercent ? `${Number(row[yAxisKey]).toFixed(1)}%` : formatYAxis(Number(row[yAxisKey]))}
                     </td>
                   </tr>
@@ -626,9 +629,9 @@ export default function VisualChart({ config, isMini = false }: VisualChartProps
 
       {/* Explanation drawer */}
       {explanation && (
-        <div className="mt-4 flex gap-2 p-3 bg-slate-950/60 border border-slate-800 rounded-xl">
-          <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-slate-300 leading-relaxed font-sans">{explanation}</p>
+        <div className="mt-4 flex gap-2 p-3 bg-[#030304]/40 border border-white/5 rounded-xl">
+          <Info className="w-4 h-4 text-bitcoin-gold shrink-0 mt-0.5 shadow-gold-glow" />
+          <p className="text-[11px] text-slate-300 leading-relaxed font-body">{explanation}</p>
         </div>
       )}
     </div>

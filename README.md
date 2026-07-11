@@ -1,88 +1,12 @@
-Talking Rabbitt
-Synthesize. Visualize. Converse.
-Talking Rabbitt is a privacy-first, client-driven Conversational Business Intelligence dashboard. It bridges the gap between complex BI setups and flat spreadsheets, allowing anyone to drop in data files, instantly compile high-fidelity interactive visual dashboards, and natively listen to voice-narrated trends and automated metrics—all with zero server footprint.
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-🚀 Core Features
-Zero-Config Automated Analytics: Instantly identifies schemas, currencies, dates, and categorical metrics to render interactive charts and coordinate benchmarks without complex configurations or formulas.
+# Run and deploy your AI Studio app
 
-Privacy by Design (Local Context Sandbox): Uploaded spreadsheet files are parsed and held entirely inside secure browser memory. Your data never touches third-party storage during analysis.
+This contains everything you need to run your app locally.
 
-Interactive Heatmap Matrices: Deeply visualizes complex data arrays, correlation densities, and multi-dimensional matrices (e.g., customer lifetime value, seasonal shifts).
-
-Text-to-Speech Summaries: A built-in audio engine synthesizes complex operational data into natural, streaming audio overviews for on-the-go decision-making.
-
-Ultra-Low Latency Conversational AI: Integrates with the Gemini API to provide a smart "Insight Analyst" persona yielding hyper-grounded, zero-hallucination metrics in 0.45 seconds.
-
-🏗️ System Architecture & Data Flow
-Talking Rabbitt is built around a hybrid client-driven architecture optimized for data security and efficient database mutations:
-    
-    %% Nodes
-    A[Raw Spreadsheet <br> CSV / XLSX]:::source
-    B[Client-Side Parsing <br> Vite / React]:::client
-    C[Interactive Heatmap & Charts]:::output
-    D[Smart Payload Capping Engine <br> workspaceService.ts]:::process
-    E[Cloud Firestore Sync <br> Safe, lightweight sync < 100KB]:::storage
-    F[Gemini API + Web Speech Synthesis]:::client
-    G[0.45s Visual & Audio Insights]:::output
-
-    %% Flow/Connections
-    A --> B
-    B --> C
-    B -->|UI Layer: Retains 100% of rows for high-fidelity views| D
-    D -->|Slices payload to ≤ 500 rows to bypass 1MB Firestore cap| E
-    E --> F
-    F --> G
-
-    %% Assign classes
-    class A source;
-    class B,F client;
-    class D process;
-    class E storage;
-    class C,G output;
-
-1. Ingestion & Multi-Dimensional Extraction
-When a user drops a spreadsheet file (.csv, .xls, .xlsx), it is intercepted entirely on the client side. The parsing stream converts the file into a structured JSON array directly inside local React state—zero persistent server footprints.
-
-2. Smart Payload Slicing (workspaceService.ts)
-For authenticated user sessions syncing with Cloud Firestore, the app manages a dual-layer strategy to bypass Firestore's strict 1MB per document limitation:
-
-Local UI Layer: Holds the complete dataset in the client's memory context for full, high-fidelity data exploration.
-
-Cloud Persistence Layer: The background workspace service intercepts the state and cleanly slices the serialized array to a 500-row representative ceiling (< 100KB document payload). This guarantees database transactions never fail due to document payload limits.
-
-3. Context Grounding & Latency Optimization
-The optimized, highly dense 500-row data format is fed straight to the Gemini API context window alongside explicit grounding rules. By keeping the token payload small, the model behaves deterministically without hallucinations, functioning with an ultra-fast response latency of 0.45s.
-
-🛠️ Tech Stack
-Frontend Hub: React, Vite, TypeScript
-
-Styling: Tailwind CSS
-
-Database & Auth: Firebase / Cloud Firestore
-
-AI Backend: Gemini API (Grounding Persona: Executive Insight Analyst)
-
-Audio Pipeline: Web Speech Synthesis API
-
-⚙️ Environment Configuration
-To run Talking Rabbitt locally, construct a .env file in your root folder and supply the following variables:
-
-Bash
-# Vite Environment Configurations
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-VITE_FIREBASE_API_KEY=your_firebase_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-📈 Scalability Roadmap
-DuckDB + WebAssembly (WASM): Migrate data heavy-lifting to in-browser Web Worker background threads, allowing seamless multi-million row processing without UI execution bottlenecks.
-
-Client-Side RAG (Retrieval-Augmented Generation): Implement vector embedding chunks locally to semantically search and pass hyper-focused slices to the AI context window, expanding past the 500-row cloud ceiling.
-
-Live Database Integration: Introduce secure local OAuth connectors to stream direct data feeds from production databases (PostgreSQL, BigQuery) and platforms (Shopify, Stripe).
-
+View your app in AI Studio: https://ai.studio/apps/b0327b1a-ebc9-4fed-aac6-5c5477cb9065
 
 ## Run Locally
 
