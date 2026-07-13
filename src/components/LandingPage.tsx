@@ -28,6 +28,7 @@ import SpreadsheetLoader from "./SpreadsheetLoader";
 import { ParsedData } from "../types";
 import { SAMPLE_DATASETS } from "../data";
 import { auth } from "../lib/firebase";
+import GeometricRabbitIcon from "./GeometricRabbitIcon";
 
 interface LandingPageProps {
   onEnterWorkspace: () => void;
@@ -39,29 +40,6 @@ interface LandingPageProps {
 }
 
 type MetricType = "revenue" | "growth" | "conversion";
-
-// Elegant Inline Geometric Rabbit Brand Icon SVG styled for Bitcoin DeFi
-const GeometricRabbitIcon = ({ className = "w-6 h-6 text-bitcoin" }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 100 100" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="4.5" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    {/* Ears */}
-    <path d="M32 15 L43 46 L50 34 L57 46 L68 15" />
-    {/* Crown & Head Bridge */}
-    <path d="M43 46 L57 46" />
-    {/* Facet Lines */}
-    <path d="M37 54 L50 43 L63 54" />
-    {/* Nose and Chin whiskers */}
-    <path d="M50 43 L50 68 L36 80" />
-    <path d="M50 68 L64 80" />
-  </svg>
-);
 
 export default function LandingPage({
   onEnterWorkspace,

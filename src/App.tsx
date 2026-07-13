@@ -30,11 +30,13 @@ import {
   Wallet
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { ParsedData, ChatMessage, AnalysisResponse, KPI, Insight, Recommendation, Forecast } from "./types";
+import { ParsedData, ChatMessage, AnalysisResponse, KPI, Insight, Recommendation, Forecast, WhatIfSimulation } from "./types";
 import SpreadsheetLoader from "./components/SpreadsheetLoader";
 import VoiceController from "./components/VoiceController";
 import VisualChart from "./components/VisualChart";
 import RecommendationCard from "./components/RecommendationCard";
+import RootCauseAnalysisCard from "./components/RootCauseAnalysisCard";
+import WhatIfSimulatorCard from "./components/WhatIfSimulatorCard";
 import LandingPage from "./components/LandingPage";
 import { auth } from "./lib/firebase";
 import { User as FirebaseUser } from "firebase/auth";
@@ -47,6 +49,7 @@ import {
 } from "./lib/workspaceService";
 import AuthModal from "./components/AuthModal";
 import WorkspacesSidebar from "./components/WorkspacesSidebar";
+import GeometricRabbitIcon from "./components/GeometricRabbitIcon";
 
 export default function App() {
   const [showLanding, setShowLanding] = useState(true);
@@ -60,6 +63,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "preview">("dashboard");
   const [apiError, setApiError] = useState<string | null>(null);
   const [isQuotaError, setIsQuotaError] = useState(false);
+  const [isCeoMode, setIsCeoMode] = useState<boolean>(true);
   
   const [customKey, setCustomKey] = useState<string>(
     () => localStorage.getItem("custom_gemini_api_key") || ""
@@ -223,6 +227,7 @@ export default function App() {
           isInitial: true,
           datasetSummary: metadata,
           rawData: rawRows.slice(0, 150),
+          isCeoMode: isCeoMode,
         }),
       });
 
@@ -311,6 +316,7 @@ export default function App() {
           rawData: rawData.slice(0, 150),
           history: chatHistory.slice(-10),
           isInitial: false,
+          isCeoMode: isCeoMode,
         }),
       });
 
@@ -440,7 +446,7 @@ export default function App() {
             title="Return to Landing Page"
           >
             <div className="p-2.5 bg-gradient-to-tr from-bitcoin-burnt to-bitcoin rounded-xl shadow-bitcoin-glow transition-colors duration-300 group-hover:border-bitcoin/50">
-              <Sparkles className="w-6 h-6 text-white" />
+              <GeometricRabbitIcon className="w-6 h-6 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -713,6 +719,22 @@ export default function App() {
                     </div>
                   )}
 
+                  {/* AI Root Cause Analysis (Cause -> Effect Flowchart) */}
+                  {currentResponse?.rootCauseAnalysis && (
+                    <RootCauseAnalysisCard analysis={currentResponse.rootCauseAnalysis} />
+                  )}
+
+                  {/* AI "What-If" Business Simulator */}
+                  {(currentResponse || parsedData) && (
+                    <WhatIfSimulatorCard 
+                      simulation={currentResponse?.whatIfSimulation}
+                      onRunScenario={(scenarioText) => {
+                        submitQuery(scenarioText);
+                      }}
+                      isProcessing={isProcessing}
+                    />
+                  )}
+
                   {/* Dynamic Graphic Stage */}
                   {currentResponse?.chartConfig && (
                     <VisualChart config={currentResponse.chartConfig} />
@@ -819,6 +841,42 @@ export default function App() {
                 </div>
 
                 {isProcessing && <RefreshCw className="w-4 h-4 text-bitcoin animate-spin" />}
+              </div>
+
+              {/* CEO Mode Switcher */}
+              <div className="px-5 py-3 border-b border-white/5 bg-bitcoin/5 flex items-center justify-between z-10 font-mono text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">👔</span>
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-bold text-white tracking-tight flex items-center gap-1.5">
+                      AI Business Consultant
+                      <span className={`text-[8px] px-1.5 py-0.2 rounded border uppercase font-bold tracking-wider transition-all duration-300 ${
+                        isCeoMode 
+                          ? "bg-bitcoin/20 text-bitcoin-gold border-bitcoin/30 animate-pulse shadow-[0_0_10px_rgba(247,147,26,0.15)]" 
+                          : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                      }`}>
+                        {isCeoMode ? "CEO Active" : "Clipped"}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <button
+                  id="toggle-ceo-mode"
+                  type="button"
+                  onClick={() => {
+                    setIsCeoMode(!isCeoMode);
+                  }}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    isCeoMode ? "bg-bitcoin" : "bg-[#030304] border border-white/10"
+                  }`}
+                  title="Toggle CEO Mode (AI Business Consultant)"
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      isCeoMode ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
+                </button>
               </div>
 
               {/* Chat bubbles viewport */}

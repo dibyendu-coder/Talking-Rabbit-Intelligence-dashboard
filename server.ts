@@ -42,12 +42,31 @@ Your response must include:
 4. "recommendations": 3 practical recommendations with details, suggested offers or interventions, and estimated business impact.
 5. "forecast": Simple 3-period predictive projections based on trends.
 6. "kpis": 3-4 core metrics calculated or estimated (e.g. Total Revenue, Average Order Value, Conversion Rate, Growth Rate) with current values, changes, and statuses ("up" or "down").
+7. "rootCauseAnalysis": Structured root cause diagnostics explaining "why" a core metric dropped, increased, or fluctuated (e.g., metric, trend, changeText, and a list of contributing factors). For example, if profit dropped 18%, list reasons such as discounts, stockouts, etc.
+`;
+
+const CEO_MODE_INSTRUCTION = `
+ROLE OVERRIDE - ACTIVE PROTOCOL: AI Business Consultant (CEO Mode)
+You are now acting as an Elite Management Consultant (McKinsey/BCG style), an expert Chief Financial Officer (CFO), and a Chief Executive Officer (CEO).
+Do NOT just report or describe raw data. You must think strategically and analytically to solve business problems, diagnose root causes, and find opportunities.
+
+Your core directives in this mode:
+1. DIAGNOSE ROOT CAUSES: When you see changes in revenue, profit, or conversion, explain the underlying "why". Connect dots across variables (e.g., "Your profit dropped 18% because discounts increased while conversion remained flat" or "Operational overhead grew faster than sales").
+2. VALUE QUANTIFICATION & AUDIT ACTIONS: Calculate concrete opportunities for savings, operational optimizations, or revenue growth. Express these in logical business terms (e.g., "If you reduce inventory of Product X by 25%, you could save ₹8.2 lakh annually" or "Consolidating low-volume suppliers could recover $45,000 in quarterly logistics waste"). Use appropriate local currency symbols (like ₹ or $ or €) matching the business context.
+3. GROWTH DIRECTION: Offer highly targeted, actionable next-steps (e.g., "Hiring another sales executive in South Zone will likely increase quarterly revenue by 12%" or "Redirect marketing spend from channels with low customer lifetime value to high-retention cohorts").
+4. SOUND LIKE A CEO/CFO/MCKINSEY LEADER: Your tone must be authoritative, objective, razor-sharp, strategic, and direct. Avoid generic observations. Use terminology like "operating leverage", "unit economics", "margin compression", "cohort retention", "inventory carrying cost", "sales capacity".
+5. INTERACTIVE WHAT-IF SIMULATION ENGINE: You MUST populate the 'whatIfSimulation' object in every response. 
+   - If the user explicitly asks a "What If?" or predictive question (e.g., "What if marketing budget increases by 20%?", "What if we close North Region?", "What if pricing increases by 5%?"), run a targeted projection matching their query.
+   - If the user's query is NOT a "What If" scenario, you MUST proactively generate a highly relevant, hypothetical business optimization scenario based on the dataset's primary bottleneck (e.g., "What if we increase average order value by 10%?", "What if we reduce logistics waste in East Region by 15%?", "What if discount rate drops by 5%?").
+   - Always calculate: expected sales/revenue, projected ROI, profit impact, and customer acquisition/volume impact as SimulationImpact items. State clear 'before' values, projected 'after' values, positive/negative 'change' percentages, and precise McKinsey-style strategic justifications.
+
+Reflect these principles deeply in your "answer", "insights", "recommendations", "kpis", "rootCauseAnalysis", and "whatIfSimulation". Every response must feel like an executive-ready consulting brief.
 `;
 
 // API endpoint for analyzing data and queries
 app.post("/api/analyze", async (req, res) => {
   try {
-    const { query, datasetSummary, rawData = [], history = [], isInitial = false } = req.body;
+    const { query, datasetSummary, rawData = [], history = [], isInitial = false, isCeoMode = true } = req.body;
     const customApiKey = req.headers["x-custom-api-key"] as string | undefined;
 
     const ai = getGeminiClient(customApiKey);
@@ -56,35 +75,39 @@ app.post("/api/analyze", async (req, res) => {
     if (isInitial) {
       userPrompt = `Perform an initial auto-discovery analysis on this dataset. Detect key trends, anomalies, top-performing dimensions, underperforming areas, and compile standard KPIs. 
 Dataset metadata & summary stats:
-${JSON.stringify(datasetSummary, null, 2)}
+\${JSON.stringify(datasetSummary, null, 2)}
 
 Row-level raw records (sample or complete):
-${JSON.stringify(rawData, null, 2)}
+\${JSON.stringify(rawData, null, 2)}
 
 Provide your response in JSON matching the specified schema. Choose the most exciting visual chart to represent the dataset's main story.`;
     } else {
-      userPrompt = `The user is asking the following query: "${query}"
+      userPrompt = `The user is asking the following query: "\${query}"
 Analyze the query in relation to this dataset's structure, statistics, and actual raw records.
 Dataset metadata & summary stats:
-${JSON.stringify(datasetSummary, null, 2)}
+\${JSON.stringify(datasetSummary, null, 2)}
 
 Row-level raw records (essential: compute aggregates, group, filter, or calculate rates using these records to build the dynamic chart):
-${JSON.stringify(rawData, null, 2)}
+\${JSON.stringify(rawData, null, 2)}
 
 Chat history for context:
-${JSON.stringify(history, null, 2)}
+\${JSON.stringify(history, null, 2)}
 
 Formulate a concise conversational answer, prepare a curated small aggregated dataset (max 12 items) specifically for a chart to visualize the answer, generate insights, recommendations, and update the KPIs if relevant.`;
     }
 
+    const systemPrompt = isCeoMode 
+      ? `\${DASHBOARD_SYSTEM_PROMPT}\n\${CEO_MODE_INSTRUCTION}`
+      : DASHBOARD_SYSTEM_PROMPT;
+
     let response;
     let usedModel = "gemini-3.5-flash";
     const requestConfig = {
-      systemInstruction: DASHBOARD_SYSTEM_PROMPT,
+      systemInstruction: systemPrompt,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
-        required: ["answer", "chartConfig", "insights", "recommendations", "forecast", "kpis"],
+        required: ["answer", "chartConfig", "insights", "recommendations", "forecast", "kpis", "rootCauseAnalysis", "whatIfSimulation"],
         properties: {
           answer: {
             type: Type.STRING,
@@ -172,6 +195,51 @@ Formulate a concise conversational answer, prepare a curated small aggregated da
                 value: { type: Type.STRING, description: "Formatted value (e.g., $120,400 or 15.4%)" },
                 change: { type: Type.STRING, description: "Change statement (e.g. +12% MoM)" },
                 status: { type: Type.STRING, description: "up or down" },
+              },
+            },
+          },
+          rootCauseAnalysis: {
+            type: Type.OBJECT,
+            required: ["metric", "trend", "changeText", "factors"],
+            properties: {
+              metric: { type: Type.STRING, description: "The primary business metric experiencing the fluctuation (e.g., Net Revenue, Average Sales Price, Checkout Conversion, Customer Retention)." },
+              trend: { type: Type.STRING, description: "Must be 'up', 'down', or 'flat'." },
+              changeText: { type: Type.STRING, description: "The overall movement description (e.g., 'fell 18% due to promotion discount pressure' or 'surged 12% via South Zone expansion')." },
+              factors: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  required: ["factor", "subtext", "impact"],
+                  properties: {
+                    factor: { type: Type.STRING, description: "Core contributing factor (e.g., 'East Region sales fell 32%' or 'Advertising spend reduced by 18%')." },
+                    subtext: { type: Type.STRING, description: "Data correlation or secondary evidence supporting this cause." },
+                    impact: { type: Type.STRING, description: "Relative magnitude of this cause. Must be 'high', 'medium', or 'low'." },
+                  },
+                },
+              },
+            },
+          },
+          whatIfSimulation: {
+            type: Type.OBJECT,
+            required: ["scenario", "confidence", "impacts", "strategicSummary"],
+            properties: {
+              scenario: { type: Type.STRING, description: "Description of the hypothetical business scenario (e.g., 'Increase marketing budget by 20%')." },
+              confidence: { type: Type.STRING, description: "Calculated prediction confidence percent and label (e.g., '85% Confidence (Data-backed)')." },
+              strategicSummary: { type: Type.STRING, description: "McKinsey/BCG level executive tactical summary about trade-offs, ROI, and core advice." },
+              impacts: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  required: ["metric", "before", "after", "change", "trend", "explanation"],
+                  properties: {
+                    metric: { type: Type.STRING, description: "The specific metric being simulated (e.g., Expected Sales, ROI, Net Profit, Customer Acquisition)." },
+                    before: { type: Type.STRING, description: "Before simulation baseline metric value (e.g., '$1.2M' or '240 users')." },
+                    after: { type: Type.STRING, description: "After simulation projected metric value (e.g., '$1.5M' or '288 users')." },
+                    change: { type: Type.STRING, description: "Simulated change text (e.g., '+25.0%' or '-10%')." },
+                    trend: { type: Type.STRING, description: "Must be 'up', 'down', or 'neutral'." },
+                    explanation: { type: Type.STRING, description: "Business math logic or explanation behind this specific projection." },
+                  },
+                },
               },
             },
           },

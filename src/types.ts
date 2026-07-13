@@ -42,6 +42,37 @@ export interface AnalysisResponse {
   recommendations: Recommendation[];
   forecast: Forecast;
   kpis: KPI[];
+  rootCauseAnalysis?: RootCauseAnalysis;
+  whatIfSimulation?: WhatIfSimulation;
+}
+
+export interface SimulationImpact {
+  metric: string;
+  before: string;
+  after: string;
+  change: string;
+  trend: "up" | "down" | "neutral";
+  explanation: string;
+}
+
+export interface WhatIfSimulation {
+  scenario: string;
+  confidence: string;
+  impacts: SimulationImpact[];
+  strategicSummary: string;
+}
+
+export interface RootCauseFactor {
+  factor: string;
+  subtext: string;
+  impact: "high" | "medium" | "low";
+}
+
+export interface RootCauseAnalysis {
+  metric: string;
+  trend: "up" | "down" | "flat";
+  changeText: string;
+  factors: RootCauseFactor[];
 }
 
 export interface ChatMessage {
