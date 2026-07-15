@@ -37,6 +37,7 @@ import VisualChart from "./components/VisualChart";
 import RecommendationCard from "./components/RecommendationCard";
 import RootCauseAnalysisCard from "./components/RootCauseAnalysisCard";
 import WhatIfSimulatorCard from "./components/WhatIfSimulatorCard";
+import ExportControls from "./components/ExportControls";
 import LandingPage from "./components/LandingPage";
 import { auth } from "./lib/firebase";
 import { User as FirebaseUser } from "firebase/auth";
@@ -609,30 +610,39 @@ export default function App() {
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 flex-1 items-start">
             {/* Visual Dashboard and recommendation lists (Takes up 2/3 columns) */}
             <div className="xl:col-span-2 space-y-6">
-              {/* Tab Toggles */}
-              <div className="flex border-b border-white/5 pb-px font-mono">
-                <button
-                  id="tab-toggle-dashboard"
-                  onClick={() => setActiveTab("dashboard")}
-                  className={`py-2 px-4 font-bold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
-                    activeTab === "dashboard"
-                      ? "border-bitcoin text-bitcoin-gold"
-                      : "border-transparent text-muted hover:text-white"
-                  }`}
-                >
-                  Intelligent Console
-                </button>
-                <button
-                  id="tab-toggle-preview"
-                  onClick={() => setActiveTab("preview")}
-                  className={`py-2 px-4 font-bold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
-                    activeTab === "preview"
-                      ? "border-bitcoin text-bitcoin-gold"
-                      : "border-transparent text-muted hover:text-white"
-                  }`}
-                >
-                  Raw Ledger Nodes ({parsedData.rowCount} rows)
-                </button>
+              {/* Tab Toggles & Export Controls */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-px font-mono">
+                <div className="flex">
+                  <button
+                    id="tab-toggle-dashboard"
+                    onClick={() => setActiveTab("dashboard")}
+                    className={`py-2 px-4 font-bold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
+                      activeTab === "dashboard"
+                        ? "border-bitcoin text-bitcoin-gold"
+                        : "border-transparent text-muted hover:text-white"
+                    }`}
+                  >
+                    Intelligent Console
+                  </button>
+                  <button
+                    id="tab-toggle-preview"
+                    onClick={() => setActiveTab("preview")}
+                    className={`py-2 px-4 font-bold text-sm border-b-2 transition-all duration-200 cursor-pointer ${
+                      activeTab === "preview"
+                        ? "border-bitcoin text-bitcoin-gold"
+                        : "border-transparent text-muted hover:text-white"
+                    }`}
+                  >
+                    Raw Ledger Nodes ({parsedData.rowCount} rows)
+                  </button>
+                </div>
+                <div className="pb-1.5 pr-1">
+                  <ExportControls 
+                    currentResponse={currentResponse}
+                    parsedData={parsedData}
+                    datasetName={parsedData?.fileName || "Active Ledger Workspace"}
+                  />
+                </div>
               </div>
 
               {activeTab === "dashboard" ? (
